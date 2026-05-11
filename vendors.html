@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendors | VehicleX</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <i data-lucide="shield" class="logo-icon" style="width: 22px; height: 22px;"></i>
+            <span class="logo-text">VehicleX</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html" class="active"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">AD</div>
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 500; color: white;">Admin User</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Vendor Directory</h1>
+                <button class="btn btn-primary" onclick="showVendorModal()">
+                    <i data-lucide="plus"></i> Register Vendor
+                </button>
+            </div>
+        </div>
+
+        <div class="card-elegant">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Contact Representative</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Parts count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vendors-body">
+                    <!-- Data injection -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal - Simple & Solid -->
+    <div id="vendor-modal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center;">
+        <div class="modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600;" id="modal-title">Vendor Registration</h2>
+                <button class="btn btn-secondary" onclick="ui.hideModal('vendor-modal')" style="padding: 10px;">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="vendor-form">
+                <input type="hidden" id="vendor-id">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label>Legal Company Name</label>
+                    <input type="text" id="name" required placeholder="e.g. Bosch Systems">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                    <div class="form-group">
+                        <label>Contact Person</label>
+                        <input type="text" id="contact" required placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Business Phone</label>
+                        <input type="text" id="phone" required placeholder="+1 000...">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required placeholder="name@company.com">
+                </div>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label>Office Address</label>
+                    <textarea id="address" placeholder="Physical location details..."
+                        style="min-height: 80px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i data-lucide="save"></i> Save Vendor
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="ui.hideModal('vendor-modal')">Discard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/api.js"></script>
+    <script>
+        async function loadVendors() {
+            try {
+                const response = await api.vendors.getAll();
+                const tbody = document.getElementById('vendors-body');
+                tbody.innerHTML = '';
+
+                response.data.forEach(v => {
+                    const row = `
+                        <tr>
+                            <td><span style="font-weight: 500; color: white;">${v.name}</span></td>
+                            <td style="color: var(--text-muted)">${v.contactPerson}</td>
+                            <td style="color: var(--accent); font-weight: 500;">${v.email}</td>
+                            <td style="color: var(--text-muted)">${v.phone || '--'}</td>
+                            <td style="text-align: center;">
+                                <span style="background: var(--bg-main); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); font-size: 0.75rem;">${v.partsCount} Items</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem">
+                                    <button class="btn btn-secondary" onclick="editVendor(${v.id})" style="padding: 8px;">
+                                        <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="deleteVendor(${v.id})" style="padding: 8px; color: var(--error);">
+                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                ui.refreshIcons();
+            } catch (err) {
+                ui.showToast(err.message || 'Vendor sync failed.', 'error');
+            }
+        }
+
+        function showVendorModal() {
+            document.getElementById('modal-title').textContent = 'Vendor Registration';
+            document.getElementById('vendor-form').reset();
+            document.getElementById('vendor-id').value = '';
+            ui.showModal('vendor-modal');
+            ui.refreshIcons();
+        }
+
+        async function editVendor(id) {
+            try {
+                const response = await api.vendors.getById(id);
+                const v = response.data;
+                document.getElementById('modal-title').textContent = 'Update Profile';
+                document.getElementById('vendor-id').value = v.id;
+                document.getElementById('name').value = v.name;
+                document.getElementById('contact').value = v.contactPerson;
+                document.getElementById('email').value = v.email;
+                document.getElementById('phone').value = v.phone;
+                document.getElementById('address').value = v.address;
+                ui.showModal('vendor-modal');
+                ui.refreshIcons();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        async function deleteVendor(id) {
+            if (!confirm('Vendor removal is permanent. Continue?')) return;
+            try {
+                await api.vendors.delete(id);
+                ui.showToast('Profile removed.');
+                loadVendors();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        document.getElementById('vendor-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('vendor-id').value;
+            const data = {
+                name: document.getElementById('name').value,
+                contactPerson: document.getElementById('contact').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value
+            };
+
+            try {
+                if (id) {
+                    await api.vendors.update(id, data);
+                    ui.showToast('Profile updated.');
+                } else {
+                    await api.vendors.create(data);
+                    ui.showToast('Registration complete.');
+                }
+                ui.hideModal('vendor-modal');
+                loadVendors();
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg, 'error');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadVendors);
+    </script>
+</body>
+
+</html>

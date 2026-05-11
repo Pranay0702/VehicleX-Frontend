@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VehicleX — Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg-main);
+        }
+
+        .hub-container {
+            max-width: 900px;
+            width: 100%;
+            padding: 3rem 2rem;
+        }
+
+        .hub-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hub-header .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .hub-header .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .hub-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .module-card:hover {
+            border-color: var(--accent);
+            background: rgba(30, 41, 59, 1);
+            transform: translateY(-2px);
+        }
+
+        .module-card .icon-wrapper {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .module-card h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .module-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .module-card .badge-owner {
+            display: inline-block;
+            margin-top: auto;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            width: fit-content;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            padding-left: 4px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="hub-container">
+        <div class="hub-header">
+            <div class="logo">
+                <i data-lucide="shield" style="width: 32px; height: 32px; color: var(--accent);"></i>
+                <span class="logo-text">VehicleX</span>
+            </div>
+            <p>Vehicle Parts Inventory Management System. Select a module below to get started.</p>
+        </div>
+
+        <!-- ── Rohit's Modules (Inventory Management) ── -->
+        <div class="section-label">Inventory Management — Rohit</div>
+        <div class="modules-grid">
+            <a href="dashboard.html" class="module-card">
+                <div class="icon-wrapper" style="background: rgba(59, 130, 246, 0.1);">
+                    <i data-lucide="layout-dashboard" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                </div>
+                <h3>Inventory Dashboard</h3>
+                <p>Overview of vendors, parts catalog, purchase invoices, and net inventory value.</p>
+                <span class="badge-owner">Rohit</span>
+            </a>
+
+            <a href="vendors.html" class="module-card">
+                <div class="icon-wrapper" style="background: rgba(16, 185, 129, 0.1);">
+                    <i data-lucide="users" style="width: 20px; height: 20px; color: var(--success);"></i>
+                </div>
+                <h3>Vendor Directory</h3>
+                <p>Register, update, and manage vendor partners who supply vehicle parts.</p>
+                <span class="badge-owner">Rohit</span>
+            </a>
+
+            <a href="parts.html" class="module-card">
+                <div class="icon-wrapper" style="background: rgba(245, 158, 11, 0.1);">
+                    <i data-lucide="package" style="width: 20px; height: 20px; color: var(--warning);"></i>
+                </div>
+                <h3>Parts Catalog</h3>
+                <p>Manage inventory items — track SKUs, stock levels, pricing, and vendor links.</p>
+                <span class="badge-owner">Rohit</span>
+            </a>
+
+            <a href="purchases.html" class="module-card">
+                <div class="icon-wrapper" style="background: rgba(239, 68, 68, 0.1);">
+                    <i data-lucide="shopping-cart" style="width: 20px; height: 20px; color: var(--error);"></i>
+                </div>
+                <h3>Purchase Invoices</h3>
+                <p>Create purchase orders to restock parts. Auto-calculates totals and updates stock.</p>
+                <span class="badge-owner">Rohit</span>
+            </a>
+        </div>
+
+        <hr class="divider">
+
+        <!-- ── Teammate Modules (Placeholders) ── -->
+        <div class="section-label">Other Modules — Team</div>
+        <div class="modules-grid">
+            <!-- Teammates will add their cards here when they pull -->
+            <!-- Example format:
+            <a href="staff.html" class="module-card">
+                <div class="icon-wrapper" style="background: rgba(168, 85, 247, 0.1);">
+                    <i data-lucide="user-check" style="width: 20px; height: 20px; color: #a855f7;"></i>
+                </div>
+                <h3>Staff Management</h3>
+                <p>Manage employees, roles, and access permissions.</p>
+                <span class="badge-owner">Teammate Name</span>
+            </a>
+            -->
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            ui.refreshIcons();
+        });
+    </script>
+</body>
+</html>
