@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .purchase-row {
+            display: grid;
+            grid-template-columns: 2fr 0.8fr 1.2fr 1fr auto;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 1px;
+        }
+
+        .purchase-row>div {
+            background: var(--bg-panel);
+            padding: 1rem;
+        }
+
+        .col-header {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .invoice-banner {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-bright);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html" class="active"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                    AD</div>
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div
+                        style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header" id="list-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Inbound Logistics</div>
+                    <h1>Purchase Records</h1>
+                </div>
+                <button class="btn btn-primary" onclick="showNewPurchase()">
+                    <i data-lucide="plus" style="width: 14px;"></i> Create Invoice
+                </button>
+            </div>
+        </div>
+
+        <div id="purchase-list-view">
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total Amount</th>
+                            <th>Internal Memo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchases-body">
+                        <!-- Data injection -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NEW PURCHASE VIEW -->
+        <div id="new-purchase-view" style="display: none;">
+            <div class="header" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>New Purchase Invoice</h1>
+                    <button class="btn btn-secondary" onclick="hideNewPurchase()">
+                        <i data-lucide="arrow-left" style="width: 14px;"></i> Back to List
+                    </button>
+                </div>
+            </div>
+
+            <div class="invoice-banner">
+                <div style="flex: 1;">
+                    <label
+                        style="display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Internal
+                        Memo</label>
+                    <input type="text" id="purchase-notes" placeholder="e.g. Monthly restock from Bosch..."
+                        style="max-width: 400px; border-color: var(--border-bright);">
+                </div>
+                <div style="text-align: right;">
+                    <div
+                        style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">
+                        Grand Total</div>
+                    <div id="grand-total" class="mono" style="font-size: 2.5rem; font-weight: 700; color: #fff;">NPR
+                        0.00</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                    Billable Items</div>
+                <button class="btn btn-secondary" onclick="addItemRow()" style="padding: 4px 10px;">
+                    <i data-lucide="plus-circle" style="width: 12px;"></i> Add Row
+                </button>
+            </div>
+
+            <div id="purchase-items-container" style="margin-bottom: 3rem;">
+                <!-- Dynamic rows -->
+            </div>
+
+            <div
+                style="display: flex; gap: 1px; background: var(--border-bright); width: fit-content; margin-left: auto;">
+                <button class="btn btn-primary" onclick="submitPurchase()" style="padding: 1rem 3rem;">
+                    Finalize & Commit Invoice
+                </button>
+                <button class="btn btn-secondary" onclick="hideNewPurchase()" style="padding: 1rem 2rem;">
+                    Discard
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let partsList = [];
+
+        async function loadPurchases() {
+            try {
+                const response = await api.purchases.getAll();
+                const tbody = document.getElementById('purchases-body');
+                tbody.innerHTML = '';
+
+                response.data.forEach(p => {
+                    const row = `
+                        <tr>
+                            <td class="mono" style="color: var(--accent); font-weight: 600;">${p.invoiceNumber}</td>
+                            <td style="color: var(--text-muted)">${new Date(p.purchaseDate).toLocaleDateString()}</td>
+                            <td><span style="background: var(--bg-hover); padding: 4px 8px; border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;">${p.items.length} SKUs</span></td>
+                            <td class="mono" style="font-weight: 600;">NPR ${p.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                            <td style="color: var(--text-dim); font-size: 0.8rem;">${p.notes || '--'}</td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                ui.refreshIcons();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        async function showNewPurchase() {
+            try {
+                const response = await api.parts.getAll();
+                partsList = response.data;
+
+                document.getElementById('purchase-list-view').style.display = 'none';
+                document.getElementById('new-purchase-view').style.display = 'block';
+                document.getElementById('list-header').style.display = 'none';
+
+                document.getElementById('purchase-items-container').innerHTML = '';
+                addItemRow();
+                updateGrandTotal();
+            } catch (err) {
+                ui.showToast('Inventory sync failed.', 'error');
+            }
+        }
+
+        function hideNewPurchase() {
+            document.getElementById('purchase-list-view').style.display = 'block';
+            document.getElementById('new-purchase-view').style.display = 'none';
+            document.getElementById('list-header').style.display = 'block';
+            loadPurchases();
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('purchase-items-container');
+            const rowId = Date.now();
+            let opts = partsList.map(p => `<option value="${p.id}" data-price="${p.price}">${p.name} [${p.partNumber}]</option>`).join('');
+
+            const html = `
+                <div class="purchase-row" id="row-${rowId}">
+                    <div>
+                        <div class="col-header">System Part</div>
+                        <select class="part-select" onchange="updateRowTotal('${rowId}')">
+                            <option value="">-- Select Item --</option>
+                            ${opts}
+                        </select>
+                    </div>
+                    <div>
+                        <div class="col-header">Qty</div>
+                        <input type="number" class="qty-input mono" min="1" value="1" oninput="updateRowTotal('${rowId}')">
+                    </div>
+                    <div>
+                        <div class="col-header">Cost / Unit (NPR)</div>
+                        <input type="number" class="price-input mono" min="0.01" step="0.01" value="0.00" oninput="updateRowTotal('${rowId}')">
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="col-header">Line Total</div>
+                        <div class="row-total mono" style="font-weight: 700; color: #fff; padding-top: 8px;">NPR 0.00</div>
+                    </div>
+                    <div style="display: flex; align-items: center; background: var(--bg-hover) !important; border-left: 1px solid var(--border);">
+                        <button class="btn btn-secondary" onclick="removeRow('${rowId}')" style="padding: 8px; color: var(--error); border: none; background: transparent;">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            ui.refreshIcons();
+        }
+
+        function removeRow(id) {
+            const rows = document.querySelectorAll('.purchase-row');
+            if (rows.length > 1) {
+                document.getElementById(`row-${id}`).remove();
+                updateGrandTotal();
+            } else {
+                ui.showToast('Invoice must contain at least one line.', 'error');
+            }
+        }
+
+        function updateRowTotal(id) {
+            const row = document.getElementById(`row-${id}`);
+            const sel = row.querySelector('.part-select');
+            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+            const pri = row.querySelector('.price-input');
+
+            if (parseFloat(pri.value) === 0 && sel.value) {
+                const opt = sel.options[sel.selectedIndex];
+                pri.value = opt.getAttribute('data-price');
+            }
+
+            const total = qty * (parseFloat(pri.value) || 0);
+            row.querySelector('.row-total').textContent = `NPR ${total.toFixed(2)}`;
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal() {
+            let grand = 0;
+            document.querySelectorAll('.purchase-row').forEach(row => {
+                const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+                const pri = parseFloat(row.querySelector('.price-input').value) || 0;
+                grand += (qty * pri);
+            });
+            document.getElementById('grand-total').textContent = `NPR ${grand.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        }
+
+        async function submitPurchase() {
+            const items = [];
+            const rows = document.querySelectorAll('.purchase-row');
+
+            for (const r of rows) {
+                const id = parseInt(r.querySelector('.part-select').value);
+                const q = parseInt(r.querySelector('.qty-input').value);
+                const p = parseFloat(r.querySelector('.price-input').value);
+
+                if (!id) {
+                    ui.showToast('Empty selection in line items.', 'error');
+                    return;
+                }
+                items.push({ partId: id, quantity: q, unitPrice: p });
+            }
+
+            try {
+                const res = await api.purchases.create({ notes: document.getElementById('purchase-notes').value, items: items });
+                ui.showToast('Invoice finalized.');
+                hideNewPurchase();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPurchases);
+    </script>
+</body>
+
+</html>

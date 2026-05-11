@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VehicleX | Hub</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .hub-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .hub-header {
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .hub-header .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hub-header h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #fff;
+        }
+
+        .hub-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin: 0.5rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-label::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--border);
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-bright);
+            background: var(--bg-hover);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hub-container">
+        <div class="hub-header">
+            <div class="logo">
+                <img src="../assets/logo.png" alt="VehicleX Logo" style="height: 180px;">
+            </div>
+
+        </div>
+
+        <div class="section-label">Inventory Systems</div>
+        <div class="modules-grid">
+            <a href="dashboard.html" class="hub-card">
+                <div class="icon-box">
+                    <i data-lucide="layout-dashboard" style="color: var(--accent);"></i>
+                </div>
+                <h3>Dashboard</h3>
+                <p>Real-time analytics, inventory valuation, and recent system activity.</p>
+            </a>
+
+            <a href="vendors.html" class="hub-card">
+                <div class="icon-box">
+                    <i data-lucide="users" style="color: var(--success);"></i>
+                </div>
+                <h3>Vendors</h3>
+                <p>Global vendor directory. Manage partner profiles and contact details.</p>
+            </a>
+
+            <a href="parts.html" class="hub-card">
+                <div class="icon-box">
+                    <i data-lucide="package" style="color: var(--warning);"></i>
+                </div>
+                <h3>Parts Catalog</h3>
+                <p>Master SKU registry. Track stock levels, pricing, and technical specs.</p>
+            </a>
+
+            <a href="purchases.html" class="hub-card">
+                <div class="icon-box">
+                    <i data-lucide="shopping-cart" style="color: var(--error);"></i>
+                </div>
+                <h3>Purchases</h3>
+                <p>Inbound logistics. Generate invoices and automate stock replenishment.</p>
+            </a>
+        </div>
+
+        <div class="section-label">Operations</div>
+        <div class="modules-grid">
+            <!-- Placeholders for teammates -->
+            <div class="hub-card" style="opacity: 0.3; cursor: not-allowed;">
+                <div class="icon-box"><i data-lucide="user-check"></i></div>
+                <h3>Staff</h3>
+                <p>Internal access management and role-based permissions.</p>
+            </div>
+            <div class="hub-card" style="opacity: 0.3; cursor: not-allowed;">
+                <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
+                <h3>Financials</h3>
+                <p>Profit/loss reporting and overhead distribution analysis.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            ui.refreshIcons();
+        });
+    </script>
+</body>
+
+</html>

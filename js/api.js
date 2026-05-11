@@ -1,9 +1,9 @@
-const API_BASE_URL = 'http://localhost:5281/api';
+const API_BASE_URL = 'http://localhost:5272/api';
 
 const api = {
     async fetch(endpoint, options = {}) {
         const url = `${API_BASE_URL}${endpoint}`;
-        
+
         const defaultHeaders = {
             'Content-Type': 'application/json',
         };
@@ -71,7 +71,7 @@ const ui = {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         const iconName = type === 'success' ? 'check-circle' : 'alert-circle';
         toast.innerHTML = `
             <div style="display: flex; align-items: center; gap: 12px">
@@ -79,10 +79,10 @@ const ui = {
                 <span>${message}</span>
             </div>
         `;
-        
+
         container.appendChild(toast);
         this.refreshIcons();
-        
+
         setTimeout(() => {
             toast.style.transform = 'translateX(120%)';
             toast.style.opacity = '0';
@@ -106,7 +106,7 @@ const ui = {
         setTimeout(() => {
             modal.style.display = 'none';
         }, 300);
-        
+
         const forms = document.querySelectorAll(`#${modalId} form`);
         forms.forEach(f => f.reset());
     }

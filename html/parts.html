@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parts | VehicleX</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
+
 <body>
     <nav>
         <div class="logo-container">
-            <i data-lucide="shield" class="logo-icon" style="width: 22px; height: 22px;"></i>
-            <span class="logo-text">VehicleX</span>
+            <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+
         </div>
         <ul class="nav-links">
             <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
@@ -19,11 +21,15 @@
             <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
         </ul>
         <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="avatar">AD</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                    AD</div>
                 <div>
-                    <div style="font-size: 0.8rem; font-weight: 500; color: white;">Admin User</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Manager</div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div
+                        style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Manager</div>
                 </div>
             </div>
         </div>
@@ -31,10 +37,15 @@
 
     <main>
         <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1>Inventory Catalog</h1>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Inventory Catalog</div>
+                    <h1>Master SKU Registry</h1>
+                </div>
                 <button class="btn btn-primary" onclick="showPartModal()">
-                    <i data-lucide="plus"></i> Add Item
+                    <i data-lucide="plus" style="width: 14px;"></i> Add New Item
                 </button>
             </div>
         </div>
@@ -45,10 +56,10 @@
                     <tr>
                         <th>Part Identifier</th>
                         <th>Internal SKU</th>
-                        <th>Preferred Vendor</th>
-                        <th>Price</th>
+                        <th>Source Vendor</th>
+                        <th>MSRP (NPR)</th>
                         <th>Availability</th>
-                        <th style="width: 100px;">Actions</th>
+                        <th style="width: 120px; text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="parts-body">
@@ -58,52 +69,52 @@
         </div>
     </main>
 
-    <!-- Part Modal -->
-    <div id="part-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center;">
+    <!-- Modal -->
+    <div id="part-modal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
         <div class="modal">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h2 style="font-size: 1.25rem; font-weight: 600;" id="modal-title">Inventory Item</h2>
-                <button class="btn btn-secondary" onclick="ui.hideModal('part-modal')" style="padding: 10px;">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
+            <h2 id="modal-title">Inventory Record</h2>
             <form id="part-form">
                 <input type="hidden" id="part-id">
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label>Common Name</label>
-                    <input type="text" id="part-name" required placeholder="e.g. Front Disc Brake">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Common Item Name</label>
+                    <input type="text" id="part-name" required placeholder="e.g. Fuel Injection Pump">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
                         <label>SKU Number</label>
-                        <input type="text" id="part-number" required placeholder="UNQ-..." style="text-transform: uppercase;">
+                        <input type="text" id="part-number" required placeholder="VX-..." class="mono"
+                            style="text-transform: uppercase;">
                     </div>
                     <div class="form-group">
-                        <label>Vendor Partner</label>
+                        <label>Preferred Partner</label>
                         <select id="vendor-id" required>
-                            <option value="">-- Choose Partner --</option>
+                            <option value="">-- Select Vendor --</option>
                         </select>
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
-                        <label>Market Price ($)</label>
-                        <input type="number" id="price" required step="0.01" min="0" placeholder="0.00">
+                        <label>Unit Price (NPR)</label>
+                        <input type="number" id="price" required step="0.01" min="0" placeholder="0.00" class="mono">
                     </div>
                     <div class="form-group">
                         <label>Initial Quantity</label>
-                        <input type="number" id="stock" required min="0" placeholder="0">
+                        <input type="number" id="stock" required min="0" placeholder="0" class="mono">
                     </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 2rem;">
-                    <label>Technical Details</label>
-                    <textarea id="description" placeholder="Notes & metadata..." style="min-height: 80px;"></textarea>
+                <div class="form-group" style="margin-bottom: 2.5rem;">
+                    <label>Technical Specifications</label>
+                    <textarea id="description" placeholder="Notes, metadata, or compatibility..."
+                        style="min-height: 80px;"></textarea>
                 </div>
-                <div style="display: flex; gap: 1rem;">
+                <div style="display: flex; gap: 1px; background: var(--border-bright);">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">
-                        <i data-lucide="archive"></i> Commit Item
+                        Commit Data
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('part-modal')">Discard</button>
+                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('part-modal')">
+                        Discard
+                    </button>
                 </div>
             </form>
         </div>
@@ -112,36 +123,36 @@
     <div id="toast-container"></div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="js/api.js"></script>
+    <script src="../js/api.js"></script>
     <script>
         async function loadParts() {
             try {
                 const response = await api.parts.getAll();
                 const tbody = document.getElementById('parts-body');
                 tbody.innerHTML = '';
-                
+
                 response.data.forEach(p => {
                     const row = `
                         <tr>
-                            <td><span style="font-weight: 500; color: white;">${p.name}</span></td>
-                            <td><code style="background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">${p.partNumber}</code></td>
+                            <td><span style="font-weight: 600; color: #fff;">${p.name}</span></td>
+                            <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${p.partNumber}</td>
                             <td style="color: var(--text-muted)">${p.vendorName}</td>
-                            <td>$${p.price.toFixed(2)}</td>
+                            <td class="mono">NPR ${p.price.toFixed(2)}</td>
                             <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                                        <div style="height: 100%; width: ${Math.min(100, (p.stockQuantity / 100) * 100)}%; background: ${p.stockQuantity < 10 ? 'var(--error)' : 'var(--accent)'}; border-radius: 10px;"></div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 60px; height: 2px; background: var(--border); position: relative;">
+                                        <div style="position: absolute; top: 0; left: 0; height: 100%; width: ${Math.min(100, (p.stockQuantity / 100) * 100)}%; background: ${p.stockQuantity < 10 ? 'var(--error)' : 'var(--accent)'};"></div>
                                     </div>
-                                    <span style="font-weight: 600; color: ${p.stockQuantity < 10 ? 'var(--error)' : 'white'}">${p.stockQuantity}</span>
+                                    <span class="mono" style="font-size: 0.8rem; font-weight: 600; color: ${p.stockQuantity < 10 ? 'var(--error)' : '#fff'}">${p.stockQuantity}</span>
                                 </div>
                             </td>
-                            <td>
-                                <div style="display: flex; gap: 0.5rem">
-                                    <button class="btn btn-secondary" onclick="editPart(${p.id})" style="padding: 8px;">
-                                        <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                                    <button class="btn btn-secondary" onclick="editPart(${p.id})" style="padding: 6px;">
+                                        <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
                                     </button>
-                                    <button class="btn btn-secondary" onclick="deletePart(${p.id})" style="padding: 8px; color: var(--error);">
-                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                    <button class="btn btn-secondary" onclick="deletePart(${p.id})" style="padding: 6px; color: var(--error);">
+                                        <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
                                     </button>
                                 </div>
                             </td>
@@ -159,7 +170,7 @@
             const select = document.getElementById('vendor-id');
             try {
                 const response = await api.vendors.getAll();
-                select.innerHTML = '<option value="">-- Choose Partner --</option>';
+                select.innerHTML = '<option value="">-- Select Vendor --</option>';
                 response.data.forEach(v => {
                     const opt = document.createElement('option');
                     opt.value = v.id;
@@ -167,7 +178,7 @@
                     select.appendChild(opt);
                 });
             } catch (err) {
-                ui.showToast('Could not fetch partners.', 'error');
+                ui.showToast('Partner sync failed.', 'error');
             }
         }
 
@@ -185,7 +196,7 @@
                 await loadVendors();
                 const response = await api.parts.getById(id);
                 const p = response.data;
-                document.getElementById('modal-title').textContent = 'Modify Data';
+                document.getElementById('modal-title').textContent = 'Modify Record';
                 document.getElementById('part-id').value = p.id;
                 document.getElementById('part-name').value = p.name;
                 document.getElementById('part-number').value = p.partNumber;
@@ -201,10 +212,10 @@
         }
 
         async function deletePart(id) {
-            if (!confirm('Permanent inventory removal. Update catalog?')) return;
+            if (!confirm('CONFIRM PERMANENT PURGE?')) return;
             try {
                 await api.parts.delete(id);
-                ui.showToast('Record deleted.');
+                ui.showToast('Item purged.');
                 loadParts();
             } catch (err) {
                 ui.showToast(err.message, 'error');
@@ -226,7 +237,7 @@
             try {
                 if (id) {
                     await api.parts.update(id, data);
-                    ui.showToast('Catalog updated.');
+                    ui.showToast('Records updated.');
                 } else {
                     await api.parts.create(data);
                     ui.showToast('Entry logged.');
@@ -242,4 +253,5 @@
         document.addEventListener('DOMContentLoaded', loadParts);
     </script>
 </body>
+
 </html>
