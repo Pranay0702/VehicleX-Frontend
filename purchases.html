@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases | VehicleX</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .invoice-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .purchase-row {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .col-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo-container">
+            <i data-lucide="shield" class="logo-icon" style="width: 22px; height: 22px;"></i>
+            <span class="logo-text">VehicleX</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html" class="active"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">AD</div>
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 500; color: white;">Admin User</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Purchase Logs</h1>
+                <button class="btn btn-primary" onclick="showNewPurchase()">
+                    <i data-lucide="plus"></i> New Invoice
+                </button>
+            </div>
+        </div>
+
+        <div id="purchase-list-view">
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bill #</th>
+                            <th>Date</th>
+                            <th>SKUs</th>
+                            <th>Total Balance</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchases-body">
+                        <!-- Data injection -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NEW PURCHASE VIEW -->
+        <div id="new-purchase-view" style="display: none;">
+            <div class="invoice-card">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Internal Memo</label>
+                    <input type="text" id="purchase-notes" placeholder="Reason for purchase..." style="max-width: 400px;">
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Invoice Total</span>
+                    <div id="grand-total" style="font-size: 2rem; font-weight: 700; color: white;">$0.00</div>
+                </div>
+            </div>
+
+            <div class="card-elegant" style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                    <h3 style="font-size: 1rem; font-weight: 600;">Billable Items</h3>
+                    <button class="btn btn-secondary" onclick="addItemRow()">
+                        <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i> Add Item
+                    </button>
+                </div>
+
+                <div id="purchase-items-container">
+                    <!-- Dynamic rows -->
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="hideNewPurchase()">Discard</button>
+                    <button class="btn btn-primary" onclick="submitPurchase()">Finalize Order</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/api.js"></script>
+    <script>
+        let partsList = [];
+
+        async function loadPurchases() {
+            try {
+                const response = await api.purchases.getAll();
+                const tbody = document.getElementById('purchases-body');
+                tbody.innerHTML = '';
+                
+                response.data.forEach(p => {
+                    const row = `
+                        <tr>
+                            <td><span style="font-weight: 600; color: var(--accent);">${p.invoiceNumber}</span></td>
+                            <td style="color: var(--text-muted)">${new Date(p.purchaseDate).toLocaleDateString()}</td>
+                            <td style="font-weight: 500;">${p.items.length} units</td>
+                            <td style="font-weight: 600;">$${p.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                            <td style="color: var(--text-dim); font-size: 0.85rem;">${p.notes || '--'}</td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                ui.refreshIcons();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        async function showNewPurchase() {
+            try {
+                const response = await api.parts.getAll();
+                partsList = response.data;
+                
+                document.getElementById('purchase-list-view').style.display = 'none';
+                document.getElementById('new-purchase-view').style.display = 'block';
+                document.querySelector('.header').style.display = 'none';
+                
+                document.getElementById('purchase-items-container').innerHTML = '';
+                addItemRow();
+                updateGrandTotal();
+            } catch (err) {
+                ui.showToast('Inventory load failed.', 'error');
+            }
+        }
+
+        function hideNewPurchase() {
+            document.getElementById('purchase-list-view').style.display = 'block';
+            document.getElementById('new-purchase-view').style.display = 'none';
+            document.querySelector('.header').style.display = 'flex';
+            loadPurchases();
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('purchase-items-container');
+            const rowId = Date.now();
+            let opts = partsList.map(p => `<option value="${p.id}" data-price="${p.price}">${p.name} [${p.partNumber}]</option>`).join('');
+            
+            const html = `
+                <div class="purchase-row" id="row-${rowId}">
+                    <div>
+                        <div class="col-header">Catalog Item</div>
+                        <select class="part-select" onchange="updateRowTotal('${rowId}')">
+                            <option value="">-- Choose Item --</option>
+                            ${opts}
+                        </select>
+                    </div>
+                    <div>
+                        <div class="col-header">Qty</div>
+                        <input type="number" class="qty-input" min="1" value="1" oninput="updateRowTotal('${rowId}')">
+                    </div>
+                    <div>
+                        <div class="col-header">Cost ($)</div>
+                        <input type="number" class="price-input" min="0.01" step="0.01" value="0.00" oninput="updateRowTotal('${rowId}')">
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="col-header">Total</div>
+                        <div class="row-total" style="font-weight: 700; color: white; padding-top: 8px;">$0.00</div>
+                    </div>
+                    <div style="padding-top: 18px;">
+                        <button class="btn btn-secondary" onclick="removeRow('${rowId}')" style="padding: 6px; color: var(--error);">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            ui.refreshIcons();
+        }
+
+        function removeRow(id) {
+            const rows = document.querySelectorAll('.purchase-row');
+            if (rows.length > 1) {
+                document.getElementById(`row-${id}`).remove();
+                updateGrandTotal();
+            } else {
+                ui.showToast('Invoice requires at least one entry.', 'error');
+            }
+        }
+
+        function updateRowTotal(id) {
+            const row = document.getElementById(`row-${id}`);
+            const sel = row.querySelector('.part-select');
+            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+            const pri = row.querySelector('.price-input');
+            
+            if (parseFloat(pri.value) === 0 && sel.value) {
+                const opt = sel.options[sel.selectedIndex];
+                pri.value = opt.getAttribute('data-price');
+            }
+
+            const total = qty * (parseFloat(pri.value) || 0);
+            row.querySelector('.row-total').textContent = `$${total.toFixed(2)}`;
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal() {
+            let grand = 0;
+            document.querySelectorAll('.purchase-row').forEach(row => {
+                const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+                const pri = parseFloat(row.querySelector('.price-input').value) || 0;
+                grand += (qty * pri);
+            });
+            document.getElementById('grand-total').textContent = `$${grand.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        }
+
+        async function submitPurchase() {
+            const items = [];
+            const rows = document.querySelectorAll('.purchase-row');
+            
+            for (const r of rows) {
+                const id = parseInt(r.querySelector('.part-select').value);
+                const q = parseInt(r.querySelector('.qty-input').value);
+                const p = parseFloat(r.querySelector('.price-input').value);
+
+                if (!id) {
+                    ui.showToast('Invalid entry in billable items.', 'error');
+                    return;
+                }
+                items.push({ partId: id, quantity: q, unitPrice: p });
+            }
+
+            try {
+                const res = await api.purchases.create({ notes: document.getElementById('purchase-notes').value, items: items });
+                ui.showToast(res.message);
+                hideNewPurchase();
+            } catch (err) {
+                ui.showToast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPurchases);
+    </script>
+</body>
+</html>
