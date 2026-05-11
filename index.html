@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VehicleX | Hub</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <style>
         body {
             display: flex;
@@ -87,14 +87,14 @@
     <div class="hub-container">
         <div class="hub-header">
             <div class="logo">
-                <img src="../assets/logo.png" alt="VehicleX Logo" style="height: 180px;">
+                <img src="assets/logo.png" alt="VehicleX Logo" style="height: 180px;">
             </div>
 
         </div>
 
         <div class="section-label">Inventory Systems</div>
         <div class="modules-grid">
-            <a href="dashboard.html" class="hub-card">
+            <a href="html/dashboard.html" class="hub-card">
                 <div class="icon-box">
                     <i data-lucide="layout-dashboard" style="color: var(--accent);"></i>
                 </div>
@@ -102,7 +102,7 @@
                 <p>Real-time analytics, inventory valuation, and recent system activity.</p>
             </a>
 
-            <a href="vendors.html" class="hub-card">
+            <a href="html/vendors.html" class="hub-card">
                 <div class="icon-box">
                     <i data-lucide="users" style="color: var(--success);"></i>
                 </div>
@@ -110,7 +110,7 @@
                 <p>Global vendor directory. Manage partner profiles and contact details.</p>
             </a>
 
-            <a href="parts.html" class="hub-card">
+            <a href="html/parts.html" class="hub-card">
                 <div class="icon-box">
                     <i data-lucide="package" style="color: var(--warning);"></i>
                 </div>
@@ -118,7 +118,7 @@
                 <p>Master SKU registry. Track stock levels, pricing, and technical specs.</p>
             </a>
 
-            <a href="purchases.html" class="hub-card">
+            <a href="html/purchases.html" class="hub-card">
                 <div class="icon-box">
                     <i data-lucide="shopping-cart" style="color: var(--error);"></i>
                 </div>
@@ -146,7 +146,7 @@
     <div id="toast-container"></div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="../js/api.js"></script>
+    <script src="js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             ui.refreshIcons();
