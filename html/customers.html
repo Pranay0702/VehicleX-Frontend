@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
+            <li><a href="customers.html" class="active"><i data-lucide="user"></i> Customers</a></li>
+            <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
+            <li><a href="staff.html"><i data-lucide="user-cog"></i> Staff</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                    AD</div>
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div
+                        style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Intelligence</div>
+                    <h1>Customer Details & History</h1>
+                </div>
+                <button class="btn btn-secondary" onclick="reloadSelectedCustomer()">
+                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh Details
+                </button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="form-group" style="min-width: 340px;">
+                <label>Search Customer</label>
+                <input type="text" id="customer-search-input"
+                    placeholder="Name, email, phone, customer ID, or vehicle number..."
+                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); searchCustomers(); }">
+            </div>
+            <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                <button class="btn btn-primary" onclick="searchCustomers()">
+                    <i data-lucide="search" style="width: 14px;"></i> Search
+                </button>
+                <button class="btn btn-secondary" onclick="clearWorkspace()">
+                    <i data-lucide="x" style="width: 14px;"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+            Search Results</div>
+        <div class="card-elegant" style="margin-bottom: 2rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Vehicle Snapshot</th>
+                        <th style="width: 120px; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-search-body"></tbody>
+            </table>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-cell">
+                <div class="profile-label">Customer</div>
+                <div id="profile-name" class="profile-value">--</div>
+            </div>
+            <div class="profile-cell">
+                <div class="profile-label">Email</div>
+                <div id="profile-email" class="profile-value">--</div>
+            </div>
+            <div class="profile-cell">
+                <div class="profile-label">Phone</div>
+                <div id="profile-phone" class="profile-value">--</div>
+            </div>
+            <div class="profile-cell">
+                <div class="profile-label">Customer Since</div>
+                <div id="profile-since" class="profile-value">--</div>
+            </div>
+            <div class="profile-cell" style="grid-column: 1 / -1;">
+                <div class="profile-label">Address</div>
+                <div id="profile-address" class="profile-value">--</div>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+            Vehicle Information</div>
+        <div class="card-elegant" style="margin-bottom: 2rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle Number</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Year</th>
+                        <th>Fuel Type</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-history-body"></tbody>
+            </table>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                Purchase History</div>
+            <div class="history-filter">
+                <div class="form-group">
+                    <label>Filter Purchases</label>
+                    <input type="text" id="purchase-filter" placeholder="Invoice number or part name..." oninput="renderPurchaseHistory()">
+                </div>
+                <div class="form-group" style="min-width: 180px;">
+                    <label>Payment Type</label>
+                    <select id="purchase-credit-filter" onchange="renderPurchaseHistory()">
+                        <option value="all">All</option>
+                        <option value="cash">Cash</option>
+                        <option value="credit">Credit</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-elegant" style="margin-bottom: 2rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Subtotal</th>
+                        <th>Discount</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th style="width: 100px; text-align: right;">Items</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-history-body"></tbody>
+            </table>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                Service History</div>
+            <span id="service-availability-pill" class="status-pill warning">No service data</span>
+        </div>
+        <div class="card-elegant">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service Type</th>
+                        <th>Date</th>
+                        <th>Notes</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="service-history-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let searchResults = [];
+        let selectedCustomerDetails = null;
+        const expandedInvoiceRows = new Set();
+
+        function money(value) {
+            return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '--';
+            return new Date(value).toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function emptyRow(colspan, text) {
+            return `<tr><td colspan="${colspan}" class="muted-empty">${text}</td></tr>`;
+        }
+
+        function statusBadge(text, type = 'warning') {
+            return `<span class="status-pill ${type}">${text}</span>`;
+        }
+
+        function serviceAvailability(isAvailable) {
+            const pill = document.getElementById('service-availability-pill');
+            if (isAvailable) {
+                pill.className = 'status-pill success';
+                pill.textContent = 'Service data available';
+            } else {
+                pill.className = 'status-pill warning';
+                pill.textContent = 'No service data';
+            }
+        }
+
+        function vehicleSnapshot(customer) {
+            const firstVehicle = (customer.vehicles || [])[0];
+            if (!firstVehicle) return '--';
+            const parts = [firstVehicle.brand, firstVehicle.model, firstVehicle.vehicleNumber].filter(Boolean);
+            return parts.join(' ') || '--';
+        }
+
+        function renderSearchResults() {
+            const tbody = document.getElementById('customer-search-body');
+            tbody.innerHTML = searchResults.length ? '' : emptyRow(5, 'No customers loaded. Search to begin.');
+
+            searchResults.forEach(customer => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${customer.fullName}</span></td>
+                        <td style="color: var(--accent); font-weight: 500;">${customer.email}</td>
+                        <td class="mono" style="font-size: 0.75rem;">${customer.phoneNumber || '--'}</td>
+                        <td style="color: var(--text-muted);">${vehicleSnapshot(customer)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 6px;" onclick="loadCustomerDetails(${customer.id})">
+                                <i data-lucide="eye" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            ui.refreshIcons();
+        }
+
+        function renderProfile() {
+            const details = selectedCustomerDetails;
+            document.getElementById('profile-name').textContent = details ? details.fullName : '--';
+            document.getElementById('profile-email').textContent = details ? details.email : '--';
+            document.getElementById('profile-phone').textContent = details ? details.phoneNumber : '--';
+            document.getElementById('profile-since').textContent = details ? formatDate(details.customerSinceUtc) : '--';
+            document.getElementById('profile-address').textContent = details?.address || '--';
+        }
+
+        function renderVehicles() {
+            const tbody = document.getElementById('vehicle-history-body');
+            const vehicles = selectedCustomerDetails?.vehicles || [];
+
+            tbody.innerHTML = vehicles.length ? '' : emptyRow(5, 'No vehicle records found');
+            vehicles.forEach(vehicle => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--accent);">${vehicle.vehicleNumber}</td>
+                        <td>${vehicle.brand || '--'}</td>
+                        <td>${vehicle.model || '--'}</td>
+                        <td class="mono">${vehicle.year || '--'}</td>
+                        <td>${vehicle.fuelType || '--'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function matchesPurchaseFilter(invoice, term, creditFilter) {
+            const normalizedTerm = term.toLowerCase();
+            const lineMatch = (invoice.items || []).some(item => `${item.partName} ${item.partNumber}`.toLowerCase().includes(normalizedTerm));
+            const textMatch = `${invoice.invoiceNumber}`.toLowerCase().includes(normalizedTerm) || lineMatch;
+
+            if (!textMatch) return false;
+            if (creditFilter === 'all') return true;
+            if (creditFilter === 'credit') return invoice.isCredit;
+            return !invoice.isCredit;
+        }
+
+        function renderPurchaseHistory() {
+            const tbody = document.getElementById('purchase-history-body');
+            const purchases = selectedCustomerDetails?.purchaseHistory || [];
+            const term = document.getElementById('purchase-filter').value.trim();
+            const creditFilter = document.getElementById('purchase-credit-filter').value;
+
+            const filtered = purchases.filter(invoice => matchesPurchaseFilter(invoice, term, creditFilter));
+            tbody.innerHTML = filtered.length ? '' : emptyRow(7, 'No purchase history matched current filters');
+
+            filtered.forEach(invoice => {
+                const paymentStatus = invoice.isCredit
+                    ? (invoice.isCreditPaid ? statusBadge('Credit Paid', 'success') : statusBadge('Credit Pending', 'warning'))
+                    : statusBadge('Cash', 'success');
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--accent); font-weight: 600;">${invoice.invoiceNumber}</td>
+                        <td style="color: var(--text-muted);">${formatDate(invoice.invoiceDateUtc)}</td>
+                        <td class="mono">${money(invoice.subTotalAmount)}</td>
+                        <td class="mono">${money(invoice.discountAmount)}</td>
+                        <td class="mono" style="font-weight: 600;">${money(invoice.totalAmount)}</td>
+                        <td>${paymentStatus}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 6px;" onclick="toggleInvoiceItems(${invoice.invoiceId})">
+                                <i data-lucide="chevrons-down-up" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+
+                if (expandedInvoiceRows.has(invoice.invoiceId)) {
+                    const items = invoice.items || [];
+                    const content = items.length
+                        ? items.map(item => `<span><span style="color: #fff;">${item.partName}</span> [${item.partNumber}] x${item.quantity} @ ${money(item.unitPrice)} = ${money(item.lineTotal)}</span>`).join('')
+                        : '<span>No line items found.</span>';
+
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="expanded-row">
+                            <td colspan="7">
+                                <div class="expanded-row-content">${content}</div>
+                            </td>
+                        </tr>
+                    `);
+                }
+            });
+
+            ui.refreshIcons();
+        }
+
+        function renderServiceHistory() {
+            const tbody = document.getElementById('service-history-body');
+            const serviceHistory = selectedCustomerDetails?.serviceHistory || [];
+            const isAvailable = Boolean(selectedCustomerDetails?.isServiceHistoryAvailable);
+
+            serviceAvailability(isAvailable);
+
+            if (!isAvailable) {
+                tbody.innerHTML = emptyRow(4, 'Service history integration is currently unavailable from backend.');
+                return;
+            }
+
+            tbody.innerHTML = serviceHistory.length ? '' : emptyRow(4, 'No service records found');
+            serviceHistory.forEach(service => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${service.serviceType || '--'}</span></td>
+                        <td style="color: var(--text-muted);">${formatDate(service.serviceDateUtc)}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${service.notes || '--'}</td>
+                        <td class="mono">${money(service.cost)}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function resetDetailsViews() {
+            selectedCustomerDetails = null;
+            expandedInvoiceRows.clear();
+            renderProfile();
+            renderVehicles();
+            renderPurchaseHistory();
+            renderServiceHistory();
+        }
+
+        async function searchCustomers() {
+            const term = document.getElementById('customer-search-input').value.trim();
+            if (!term) {
+                ui.showToast('Enter a search term first.', 'error');
+                return;
+            }
+
+            try {
+                const response = await api.customers.search(term);
+                searchResults = response.data || [];
+                renderSearchResults();
+
+                if (!searchResults.length) {
+                    ui.showToast(response.message || 'No customer matched the search term.', 'error');
+                }
+            } catch (err) {
+                const message = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(message || 'Customer search failed.', 'error');
+            }
+        }
+
+        async function loadCustomerDetails(customerId) {
+            try {
+                const response = await api.customers.getDetailsForStaff(customerId);
+                selectedCustomerDetails = response.data || null;
+                expandedInvoiceRows.clear();
+
+                renderProfile();
+                renderVehicles();
+                renderPurchaseHistory();
+                renderServiceHistory();
+                ui.showToast('Customer details loaded.');
+            } catch (err) {
+                const message = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(message || 'Failed to load customer details.', 'error');
+            }
+        }
+
+        async function reloadSelectedCustomer() {
+            if (!selectedCustomerDetails?.customerId) {
+                ui.showToast('Select a customer from search results first.', 'error');
+                return;
+            }
+
+            await loadCustomerDetails(selectedCustomerDetails.customerId);
+        }
+
+        function toggleInvoiceItems(invoiceId) {
+            if (expandedInvoiceRows.has(invoiceId)) {
+                expandedInvoiceRows.delete(invoiceId);
+            } else {
+                expandedInvoiceRows.add(invoiceId);
+            }
+
+            renderPurchaseHistory();
+        }
+
+        function clearWorkspace() {
+            searchResults = [];
+            document.getElementById('customer-search-input').value = '';
+            document.getElementById('purchase-filter').value = '';
+            document.getElementById('purchase-credit-filter').value = 'all';
+            renderSearchResults();
+            resetDetailsViews();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ui.refreshIcons();
+            clearWorkspace();
+        });
+    </script>
+</body>
+
+</html>

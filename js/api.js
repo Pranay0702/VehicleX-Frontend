@@ -61,6 +61,7 @@ const api = {
         getAll: () => api.fetch('/customers'),
         getById: (id) => api.fetch(`/customers/${id}`),
         search: (term) => api.fetch(`/customers/search?searchTerm=${encodeURIComponent(term)}`),
+        getDetailsForStaff: (id) => api.fetch(`/customers/staff/${id}/details-history`),
     },
 
     appointments: {
@@ -94,6 +95,39 @@ const api = {
         update: (id, data) => api.fetch(`/staff/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         updateRole: (id, data) => api.fetch(`/staff/${id}/role`, { method: 'PATCH', body: JSON.stringify(data) }),
         delete: (id) => api.fetch(`/staff/${id}`, { method: 'DELETE' }),
+    },
+
+    sales: {
+        getCustomers: () => api.fetch('/sales/customers'),
+        getParts: () => api.fetch('/sales/parts'),
+        createInvoice: (data) => api.fetch('/sales/invoices', { method: 'POST', body: JSON.stringify(data) }),
+        getInvoiceById: (id) => api.fetch(`/sales/invoices/${id}`),
+    }
+};
+
+const salesPricing = {
+    loyaltyThreshold: 5000,
+    loyaltyRate: 0.10,
+    defaultTaxRate: 0.13,
+
+    computeTotals(subtotal, taxRate = 0.13) {
+        const safeSubtotal = Number(subtotal) || 0;
+        const safeTaxRate = Number(taxRate) || 0;
+        const discount = safeSubtotal > this.loyaltyThreshold
+            ? Number((safeSubtotal * this.loyaltyRate).toFixed(2))
+            : 0;
+        const discountedSubtotal = safeSubtotal - discount;
+        const tax = Number((discountedSubtotal * safeTaxRate).toFixed(2));
+        const grandTotal = Math.max(0, Number((discountedSubtotal + tax).toFixed(2)));
+
+        return {
+            subtotal: safeSubtotal,
+            discount,
+            discountedSubtotal,
+            tax,
+            grandTotal,
+            isLoyaltyApplied: discount > 0
+        };
     }
 };
 

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="sales.html" class="active"><i data-lucide="receipt"></i> Sales</a></li>
+            <li><a href="customers.html"><i data-lucide="user"></i> Customers</a></li>
+            <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
+            <li><a href="staff.html"><i data-lucide="user-cog"></i> Staff</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                    AD</div>
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div
+                        style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Retail Operations</div>
+                    <h1>Vehicle Parts Sales</h1>
+                </div>
+                <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                    <button class="btn btn-secondary" onclick="syncSalesWorkspace()">
+                        <i data-lucide="refresh-cw" style="width: 14px;"></i> Sync Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearCart()">
+                        <i data-lucide="x" style="width: 14px;"></i> Reset Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="form-group" style="min-width: 320px;">
+                <label>Customer Account</label>
+                <select id="sales-customer" onchange="updateCustomerPreview()">
+                    <option value="">-- Select Customer --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Payment Status</label>
+                <select id="payment-status">
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Credit">Credit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tax Rate</label>
+                <input type="text" id="tax-rate-readonly" value="13%" readonly>
+            </div>
+            <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                <button class="btn btn-primary" id="finalize-sale-btn" onclick="finalizeSale()">
+                    <i data-lucide="receipt-text" style="width: 14px;"></i> Finalize Sale
+                </button>
+            </div>
+        </div>
+
+        <div class="sales-workbench">
+            <section class="sales-panel">
+                <div class="sales-panel-header">
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                        Parts Catalog</div>
+                    <span id="parts-count" class="status-pill">0 Parts</span>
+                </div>
+                <div class="form-group sales-filter">
+                    <label>Search Parts</label>
+                    <input type="text" id="parts-search" placeholder="Part name or part number..." oninput="renderPartsCatalog()">
+                </div>
+                <div class="sales-table-wrap card-elegant">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Part #</th>
+                                <th>Unit Price</th>
+                                <th>Stock</th>
+                                <th style="width: 90px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-parts-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="sales-panel">
+                <div class="sales-panel-header">
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                        Invoice Cart</div>
+                    <span id="cart-count" class="status-pill">0 Items</span>
+                </div>
+                <div class="sales-table-wrap card-elegant">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Line Total</th>
+                                <th style="width: 70px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-cart-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div class="panel-grid" style="margin-bottom: 2rem;">
+            <div class="panel-cell">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+                    Selected Customer</div>
+                <div id="customer-preview-name" style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;">--</div>
+                <div id="customer-preview-email" style="font-size: 0.8rem; color: var(--text-muted);">No customer selected</div>
+            </div>
+            <div class="panel-cell">
+                <div class="totals-card" style="margin: 0; border: 0; padding: 0; background: transparent;">
+                    <div class="totals-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal-amount" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Discount</span>
+                        <span id="discount-amount" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Tax (13%)</span>
+                        <span id="tax-amount" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row grand">
+                        <span>Grand Total</span>
+                        <span id="grand-total-amount" class="mono">NPR 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loyalty-banner" class="loyalty-banner">
+            Spend more than NPR 5,000.00 in one invoice to unlock a 10% loyalty discount.
+        </div>
+
+        <section id="invoice-section" style="display: none;">
+            <div class="header" style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem;">
+                    <div>
+                        <div
+                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                            Sales Invoice</div>
+                        <h1>Invoice Preview</h1>
+                    </div>
+                    <div id="invoice-status-pill"></div>
+                </div>
+            </div>
+
+            <div class="invoice-sheet" id="invoice-sheet">
+                <div class="invoice-meta-grid">
+                    <div class="meta-cell">
+                        <div class="meta-label">Invoice Number</div>
+                        <div id="invoice-number" class="mono" style="font-size: 1rem; color: #fff; font-weight: 700;">--</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Date / Time</div>
+                        <div id="invoice-date" class="mono" style="font-size: 0.85rem; color: #fff;">--</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Customer</div>
+                        <div id="invoice-customer" style="font-size: 0.85rem; color: #fff;">--</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Payment Status</div>
+                        <div id="invoice-payment-status">--</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Original Amount</div>
+                        <div id="invoice-original" class="mono">NPR 0.00</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Final Payable</div>
+                        <div id="invoice-payable" class="mono" style="font-size: 1rem; color: #fff; font-weight: 700;">NPR 0.00</div>
+                    </div>
+                </div>
+
+                <div class="card-elegant" style="margin-bottom: 1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Part #</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-items-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="totals-card" style="margin-bottom: 0;">
+                    <div class="totals-row">
+                        <span>Subtotal</span>
+                        <span id="invoice-subtotal" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Loyalty Discount</span>
+                        <span id="invoice-discount" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Tax (13%)</span>
+                        <span id="invoice-tax" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row grand">
+                        <span>Grand Total</span>
+                        <span id="invoice-grand-total" class="mono">NPR 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-actions" style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="printInvoice()">
+                    <i data-lucide="printer" style="width: 14px;"></i> Print Invoice
+                </button>
+                <button class="btn btn-primary" onclick="downloadInvoice()">
+                    <i data-lucide="download" style="width: 14px;"></i> Download Invoice
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let salesCustomers = [];
+        let salesParts = [];
+        let cartItems = [];
+        let currentInvoice = null;
+        let currentInvoiceStatus = 'Paid';
+
+        function money(value) {
+            return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function selectedCustomer() {
+            const customerId = parseInt(document.getElementById('sales-customer').value);
+            if (!customerId) return null;
+            return salesCustomers.find(item => item.id === customerId) || null;
+        }
+
+        function updateCustomerPreview() {
+            const customer = selectedCustomer();
+            const name = document.getElementById('customer-preview-name');
+            const email = document.getElementById('customer-preview-email');
+
+            if (!customer) {
+                name.textContent = '--';
+                email.textContent = 'No customer selected';
+                return;
+            }
+
+            name.textContent = customer.fullName;
+            email.textContent = customer.email;
+        }
+
+        function emptyRow(colspan, text) {
+            return `<tr><td colspan="${colspan}" class="muted-empty">${text}</td></tr>`;
+        }
+
+        function findPart(partId) {
+            return salesParts.find(item => item.id === partId);
+        }
+
+        function renderCustomerOptions() {
+            const select = document.getElementById('sales-customer');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select Customer --</option>';
+
+            salesCustomers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = `${customer.fullName} | ${customer.email}`;
+                select.appendChild(option);
+            });
+
+            if (currentValue && salesCustomers.some(item => String(item.id) === String(currentValue))) {
+                select.value = currentValue;
+            }
+
+            updateCustomerPreview();
+        }
+
+        function renderPartsCatalog() {
+            const term = document.getElementById('parts-search').value.trim().toLowerCase();
+            const tbody = document.getElementById('sales-parts-body');
+
+            const filtered = salesParts.filter(part => {
+                if (!term) return true;
+                const text = `${part.name} ${part.partNumber}`.toLowerCase();
+                return text.includes(term);
+            });
+
+            document.getElementById('parts-count').textContent = `${filtered.length} Parts`;
+            tbody.innerHTML = filtered.length ? '' : emptyRow(5, 'No parts matched the search');
+
+            filtered.forEach(part => {
+                const hasStock = part.stockQuantity > 0;
+                const lowStock = part.stockQuantity > 0 && part.stockQuantity < 10;
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${part.name}</span></td>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${part.partNumber}</td>
+                        <td class="mono">${money(part.unitPrice)}</td>
+                        <td>
+                            <span class="stock-pill ${!hasStock || lowStock ? 'error' : ''}">${part.stockQuantity} in stock</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 6px;" onclick="addPartToCart(${part.id})" ${!hasStock ? 'disabled' : ''}>
+                                <i data-lucide="plus" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            ui.refreshIcons();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('sales-cart-body');
+            tbody.innerHTML = cartItems.length ? '' : emptyRow(5, 'Cart is empty');
+
+            cartItems.forEach(item => {
+                const lineTotal = item.quantity * item.unitPrice;
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: #fff;">${item.name}</div>
+                            <div class="mono" style="font-size: 0.72rem; color: var(--text-muted);">${item.partNumber}</div>
+                        </td>
+                        <td>
+                            <input
+                                type="number"
+                                min="1"
+                                max="${item.stockQuantity}"
+                                class="cart-qty mono"
+                                value="${item.quantity}"
+                                onchange="updateCartQuantity(${item.partId}, this.value)"
+                            >
+                        </td>
+                        <td class="mono">${money(item.unitPrice)}</td>
+                        <td class="mono" style="font-weight: 600;">${money(lineTotal)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 6px; color: var(--error);" onclick="removeCartItem(${item.partId})">
+                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            document.getElementById('cart-count').textContent = `${cartItems.length} Items`;
+            updateTotals();
+            ui.refreshIcons();
+        }
+
+        function updateTotals() {
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+            const totals = salesPricing.computeTotals(subtotal, salesPricing.defaultTaxRate);
+
+            document.getElementById('subtotal-amount').textContent = money(totals.subtotal);
+            document.getElementById('discount-amount').textContent = money(totals.discount);
+            document.getElementById('tax-amount').textContent = money(totals.tax);
+            document.getElementById('grand-total-amount').textContent = money(totals.grandTotal);
+
+            const banner = document.getElementById('loyalty-banner');
+            if (totals.isLoyaltyApplied) {
+                banner.classList.add('success');
+                banner.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; gap: 1rem; align-items: center;">
+                        <span>LOYALTY DISCOUNT APPLIED (10%)</span>
+                        <span class="mono">- ${money(totals.discount)}</span>
+                    </div>
+                `;
+            } else {
+                const remaining = Math.max(0, salesPricing.loyaltyThreshold - totals.subtotal);
+                banner.classList.remove('success');
+                banner.textContent = `Spend ${money(remaining)} more in this invoice to unlock a 10% loyalty discount.`;
+            }
+        }
+
+        function addPartToCart(partId) {
+            const part = findPart(partId);
+            if (!part || part.stockQuantity <= 0) {
+                ui.showToast('Part is currently out of stock.', 'error');
+                return;
+            }
+
+            const existing = cartItems.find(item => item.partId === partId);
+            if (existing) {
+                if (existing.quantity >= part.stockQuantity) {
+                    ui.showToast('Requested quantity exceeds stock.', 'error');
+                    return;
+                }
+                existing.quantity += 1;
+            } else {
+                cartItems.push({
+                    partId: part.id,
+                    name: part.name,
+                    partNumber: part.partNumber,
+                    unitPrice: Number(part.unitPrice),
+                    stockQuantity: part.stockQuantity,
+                    quantity: 1
+                });
+            }
+
+            renderCart();
+        }
+
+        function updateCartQuantity(partId, rawValue) {
+            const item = cartItems.find(entry => entry.partId === partId);
+            if (!item) return;
+
+            const value = parseInt(rawValue);
+            if (!value || value < 1) {
+                item.quantity = 1;
+            } else if (value > item.stockQuantity) {
+                item.quantity = item.stockQuantity;
+                ui.showToast('Quantity adjusted to available stock.', 'error');
+            } else {
+                item.quantity = value;
+            }
+
+            renderCart();
+        }
+
+        function removeCartItem(partId) {
+            cartItems = cartItems.filter(item => item.partId !== partId);
+            renderCart();
+        }
+
+        function clearCart() {
+            cartItems = [];
+            renderCart();
+        }
+
+        async function syncSalesWorkspace() {
+            try {
+                const [customerResponse, partsResponse] = await Promise.all([
+                    api.sales.getCustomers(),
+                    api.sales.getParts()
+                ]);
+
+                salesCustomers = customerResponse.data || [];
+                salesParts = partsResponse.data || [];
+
+                renderCustomerOptions();
+                renderPartsCatalog();
+                renderCart();
+                ui.refreshIcons();
+            } catch (err) {
+                ui.showToast(err.message || 'Failed to sync sales workspace.', 'error');
+            }
+        }
+
+        async function finalizeSale() {
+            const customer = selectedCustomer();
+            if (!customer) {
+                ui.showToast('Select a customer account before finalizing.', 'error');
+                return;
+            }
+
+            if (cartItems.length === 0) {
+                ui.showToast('Add at least one part to the cart.', 'error');
+                return;
+            }
+
+            const button = document.getElementById('finalize-sale-btn');
+            button.disabled = true;
+
+            const payload = {
+                customerId: customer.id,
+                items: cartItems.map(item => ({
+                    partId: item.partId,
+                    quantity: item.quantity
+                }))
+            };
+
+            try {
+                const createResponse = await api.sales.createInvoice(payload);
+                const createdInvoice = createResponse.data;
+                let invoice = createdInvoice;
+
+                if (createdInvoice && createdInvoice.invoiceId) {
+                    const details = await api.sales.getInvoiceById(createdInvoice.invoiceId);
+                    invoice = details.data || createdInvoice;
+                }
+
+                currentInvoiceStatus = document.getElementById('payment-status').value;
+                currentInvoice = invoice;
+
+                renderInvoice(invoice, customer);
+                clearCart();
+                await syncSalesWorkspace();
+                ui.showToast('Sales invoice created successfully.');
+            } catch (err) {
+                const message = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(message || 'Failed to create sales invoice.', 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function statusType(status) {
+            const value = String(status || '').toLowerCase();
+            if (value.includes('paid')) return 'success';
+            if (value.includes('pending')) return 'warning';
+            return 'error';
+        }
+
+        function renderInvoice(invoice, customer) {
+            if (!invoice) return;
+
+            const subtotal = Number(invoice.subTotalAmount || 0);
+            const discount = Number(invoice.discountAmount || 0);
+            const discountedSubtotal = subtotal - discount;
+            const tax = Number((discountedSubtotal * salesPricing.defaultTaxRate).toFixed(2));
+            const grandTotal = Math.max(0, Number((discountedSubtotal + tax).toFixed(2)));
+
+            document.getElementById('invoice-section').style.display = 'block';
+            document.getElementById('invoice-number').textContent = invoice.invoiceNumber || `INV-${String(invoice.invoiceId || '').padStart(6, '0')}`;
+            document.getElementById('invoice-date').textContent = new Date(invoice.createdAtUtc || Date.now()).toLocaleString();
+            document.getElementById('invoice-customer').textContent = `${invoice.customerName || customer.fullName} | ${customer.email}`;
+            document.getElementById('invoice-payment-status').innerHTML = `<span class="status-pill ${statusType(currentInvoiceStatus)}">${currentInvoiceStatus}</span>`;
+            document.getElementById('invoice-original').textContent = money(subtotal);
+            document.getElementById('invoice-payable').textContent = money(grandTotal);
+            document.getElementById('invoice-subtotal').textContent = money(subtotal);
+            document.getElementById('invoice-discount').textContent = money(discount);
+            document.getElementById('invoice-tax').textContent = money(tax);
+            document.getElementById('invoice-grand-total').textContent = money(grandTotal);
+            document.getElementById('invoice-status-pill').innerHTML = `<span class="status-pill ${statusType(currentInvoiceStatus)}">${currentInvoiceStatus}</span>`;
+
+            const tbody = document.getElementById('invoice-items-body');
+            const items = invoice.items || [];
+            tbody.innerHTML = items.length ? '' : emptyRow(5, 'No invoice line items found');
+
+            items.forEach(item => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.partName}</span></td>
+                        <td class="mono" style="color: var(--text-muted);">${item.partNumber}</td>
+                        <td class="mono">${item.quantity}</td>
+                        <td class="mono">${money(item.unitPrice)}</td>
+                        <td class="mono" style="font-weight: 600;">${money(item.lineTotal)}</td>
+                    </tr>
+                `);
+            });
+
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            ui.refreshIcons();
+        }
+
+        function printInvoice() {
+            if (!currentInvoice) {
+                ui.showToast('Create an invoice before printing.', 'error');
+                return;
+            }
+
+            window.print();
+        }
+
+        function downloadInvoice() {
+            if (!currentInvoice) {
+                ui.showToast('Create an invoice before downloading.', 'error');
+                return;
+            }
+
+            const invoiceNo = currentInvoice.invoiceNumber || `INV-${currentInvoice.invoiceId}`;
+            const invoiceText = [
+                `Invoice Number: ${invoiceNo}`,
+                `Date: ${new Date(currentInvoice.createdAtUtc || Date.now()).toLocaleString()}`,
+                `Customer: ${document.getElementById('invoice-customer').textContent}`,
+                `Payment Status: ${currentInvoiceStatus}`,
+                '',
+                'Items:'
+            ];
+
+            (currentInvoice.items || []).forEach(item => {
+                invoiceText.push(`- ${item.partName} [${item.partNumber}] x${item.quantity} @ ${money(item.unitPrice)} = ${money(item.lineTotal)}`);
+            });
+
+            invoiceText.push('');
+            invoiceText.push(`Subtotal: ${document.getElementById('invoice-subtotal').textContent}`);
+            invoiceText.push(`Discount: ${document.getElementById('invoice-discount').textContent}`);
+            invoiceText.push(`Tax: ${document.getElementById('invoice-tax').textContent}`);
+            invoiceText.push(`Grand Total: ${document.getElementById('invoice-grand-total').textContent}`);
+
+            const blob = new Blob([invoiceText.join('\n')], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `${invoiceNo}.txt`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            ui.refreshIcons();
+            document.getElementById('tax-rate-readonly').value = `${Math.round(salesPricing.defaultTaxRate * 100)}%`;
+            renderCart();
+            await syncSalesWorkspace();
+        });
+    </script>
+</body>
+
+</html>
