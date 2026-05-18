@@ -8,6 +8,11 @@ const api = {
             'Content-Type': 'application/json',
         };
 
+        const token = localStorage.getItem('customerToken');
+        if (token) {
+            defaultHeaders['Authorization'] = `Bearer ${token}`;
+        }
+
         const config = {
             ...options,
             headers: {
@@ -62,6 +67,16 @@ const api = {
         getById: (id) => api.fetch(`/customers/${id}`),
         search: (term) => api.fetch(`/customers/search?searchTerm=${encodeURIComponent(term)}`),
         getDetailsForStaff: (id) => api.fetch(`/customers/staff/${id}/details-history`),
+        staffRegister: (data) => api.fetch('/customers/staff-register', { method: 'POST', body: JSON.stringify(data) }),
+        selfRegister: (data) => api.fetch('/customers/self-register', { method: 'POST', body: JSON.stringify(data) }),
+        login: (data) => api.fetch('/customers/login', { method: 'POST', body: JSON.stringify(data) }),
+        getProfile: () => api.fetch('/customers/profile'),
+        updateProfile: (data) => api.fetch('/customers/profile', { method: 'PUT', body: JSON.stringify(data) }),
+        getVehicles: () => api.fetch('/customers/vehicles'),
+        addVehicle: (data) => api.fetch('/customers/vehicles', { method: 'POST', body: JSON.stringify(data) }),
+        updateVehicle: (vehicleId, data) => api.fetch(`/customers/vehicles/${vehicleId}`, { method: 'PUT', body: JSON.stringify(data) }),
+        deleteVehicle: (vehicleId) => api.fetch(`/customers/vehicles/${vehicleId}`, { method: 'DELETE' }),
+        logout: () => localStorage.removeItem('customerToken'),
     },
 
     appointments: {

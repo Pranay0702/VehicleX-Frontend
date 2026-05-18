@@ -152,7 +152,7 @@
         </div>
 
         <div class="section-label">Operations</div>
-        <div class="modules-grid">
+        <div class="modules-grid" style="margin-bottom: 2rem;">
             <a href="html/staff.html" class="hub-card">
                 <div class="icon-box"><i data-lucide="user-check"></i></div>
                 <h3>Staff</h3>
@@ -164,6 +164,25 @@
                 <p>Profit/loss reporting and overhead distribution analysis.</p>
             </div>
         </div>
+
+        <div class="section-label">Customer Portal</div>
+        <div class="modules-grid">
+            <a href="html/login.html" class="hub-card" id="hub-customer-login">
+                <div class="icon-box">
+                    <i data-lucide="log-in" style="color: var(--accent);"></i>
+                </div>
+                <h3>Customer Login</h3>
+                <p>Access your customer profile, view details, and manage your registered vehicles.</p>
+            </a>
+
+            <a href="html/register.html" class="hub-card">
+                <div class="icon-box">
+                    <i data-lucide="user-plus" style="color: var(--success);"></i>
+                </div>
+                <h3>Self Registration</h3>
+                <p>Register as a new customer with your details and your vehicle information.</p>
+            </a>
+        </div>
     </div>
 
     <div id="toast-container"></div>
@@ -173,6 +192,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             ui.refreshIcons();
+
+            // Dynamic check for Customer Portal link
+            if (localStorage.getItem('customerToken')) {
+                const loginCard = document.getElementById('hub-customer-login');
+                if (loginCard) {
+                    loginCard.href = 'html/customer-profile.html';
+                    loginCard.querySelector('h3').textContent = 'My Profile';
+                    loginCard.querySelector('p').textContent = 'Manage your customer profile and view/edit your registered vehicles.';
+                }
+            }
         });
     </script>
 </body>

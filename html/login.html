@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            min-height: 100vh;
+            background-color: var(--bg-page);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="../assets/logo.png" alt="Logo" style="height: 120px; margin-bottom: 1rem;">
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Customer Portal</div>
+            <h2>Sign In</h2>
+        </div>
+        <form id="login-form">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Email Address</label>
+                <input type="email" id="email" required placeholder="john@example.com">
+            </div>
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Log In
+                </button>
+                <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                    Don't have an account? <a href="register.html" style="color: var(--accent); text-decoration: none;">Register here</a>
+                </div>
+                <div style="text-align: center; font-size: 0.8rem; margin-top: 1rem;">
+                    <a href="../index.html" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to Hub
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            ui.refreshIcons();
+
+            // If already logged in, redirect to profile
+            if (localStorage.getItem('customerToken')) {
+                window.location.href = 'customer-profile.html';
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await api.customers.login(data);
+
+                // Extract token safely (handling nested response.data or direct return)
+                let token = '';
+                if (response.data && response.data.token) {
+                    token = response.data.token;
+                } else if (response.data && response.data.accessToken) {
+                    token = response.data.accessToken;
+                } else if (response.token) {
+                    token = response.token;
+                } else if (response.accessToken) {
+                    token = response.accessToken;
+                }
+
+                if (!token) {
+                    throw new Error('Authentication succeeded but no token was returned.');
+                }
+
+                localStorage.setItem('customerToken', token);
+                ui.showToast('Login successful! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'customer-profile.html';
+                }, 1000);
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg || 'Invalid email or password.', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>
