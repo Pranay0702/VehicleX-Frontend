@@ -9,7 +9,7 @@
     <style>
         .purchase-row {
             display: grid;
-            grid-template-columns: 2fr 0.8fr 1.2fr 1fr auto;
+            grid-template-columns: 2.5fr 1fr 1.5fr auto;
             gap: 1px;
             background: var(--border);
             border: 1px solid var(--border);
@@ -53,7 +53,7 @@
             <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
             <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
             <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
-            <li><a href="purchases.html" class="active"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="purchases.html" class="active"><i data-lucide="shopping-cart"></i> Restock</a></li>
             <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
             <li><a href="customers.html"><i data-lucide="user"></i> Customers</a></li>
             <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
@@ -81,10 +81,10 @@
                     <div
                         style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
                         Inbound Logistics</div>
-                    <h1>Purchase Records</h1>
+                    <h1>Restock Records</h1>
                 </div>
                 <button class="btn btn-primary" onclick="showNewPurchase()">
-                    <i data-lucide="plus" style="width: 14px;"></i> Create Invoice
+                    <i data-lucide="plus" style="width: 14px;"></i> Create Restock
                 </button>
             </div>
         </div>
@@ -105,6 +105,18 @@
                         <!-- Data injection -->
                     </tbody>
                 </table>
+                <div class="pagination-controls" id="purchases-pagination"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);" id="purchases-page-info">
+                        Showing 0 entries
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" id="btn-purchases-prev" onclick="changePurchasesPage(-1)"
+                            style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                        <button class="btn btn-secondary" id="btn-purchases-next" onclick="changePurchasesPage(1)"
+                            style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -112,7 +124,7 @@
         <div id="new-purchase-view" style="display: none;">
             <div class="header" style="margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>New Purchase Invoice</h1>
+                    <h1>New Restock Invoice</h1>
                     <button class="btn btn-secondary" onclick="hideNewPurchase()">
                         <i data-lucide="arrow-left" style="width: 14px;"></i> Back to List
                     </button>
@@ -139,7 +151,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div
                     style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
-                    Billable Items</div>
+                    Restock Items</div>
                 <button class="btn btn-secondary" onclick="addItemRow()" style="padding: 4px 10px;">
                     <i data-lucide="plus-circle" style="width: 12px;"></i> Add Row
                 </button>
@@ -152,7 +164,7 @@
             <div
                 style="display: flex; gap: 1px; background: var(--border-bright); width: fit-content; margin-left: auto;">
                 <button class="btn btn-primary" onclick="submitPurchase()" style="padding: 1rem 3rem;">
-                    Finalize & Commit Invoice
+                    Finalize & Commit Restock
                 </button>
                 <button class="btn btn-secondary" onclick="hideNewPurchase()" style="padding: 1rem 2rem;">
                     Discard
@@ -167,26 +179,68 @@
     <script src="../js/api.js"></script>
     <script>
         let partsList = [];
+        let allPurchasesList = [];
+        let purchasesCurrentPage = 1;
+        const purchasesItemsPerPage = 5;
+
+        function renderPurchases() {
+            const tbody = document.getElementById('purchases-body');
+            tbody.innerHTML = '';
+
+            if (allPurchasesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 4rem; font-size: 0.8rem;">NO RECENT ACTIVITY LOGGED</td></tr>';
+                document.getElementById('purchases-page-info').textContent = 'Showing 0 entries';
+                document.getElementById('btn-purchases-prev').disabled = true;
+                document.getElementById('btn-purchases-next').disabled = true;
+                document.getElementById('btn-purchases-prev').style.opacity = '0.5';
+                document.getElementById('btn-purchases-next').style.opacity = '0.5';
+                return;
+            }
+
+            const startIdx = (purchasesCurrentPage - 1) * purchasesItemsPerPage;
+            const endIdx = startIdx + purchasesItemsPerPage;
+            const pageData = allPurchasesList.slice(startIdx, endIdx);
+
+            pageData.forEach(p => {
+                const row = `
+                    <tr>
+                        <td class="mono" style="color: var(--accent); font-weight: 600;">${p.invoiceNumber}</td>
+                        <td style="color: var(--text-muted)">${new Date(p.purchaseDate).toLocaleDateString()}</td>
+                        <td><span style="background: var(--bg-hover); padding: 4px 8px; border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;">${p.items.length} SKUs</span></td>
+                        <td class="mono" style="font-weight: 600;">NPR ${p.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${p.notes || '--'}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            const totalItems = allPurchasesList.length;
+            const totalPages = Math.ceil(totalItems / purchasesItemsPerPage);
+            document.getElementById('purchases-page-info').textContent =
+                `Showing ${startIdx + 1} to ${Math.min(endIdx, totalItems)} of ${totalItems} entries`;
+
+            const btnPrev = document.getElementById('btn-purchases-prev');
+            const btnNext = document.getElementById('btn-purchases-next');
+            btnPrev.disabled = purchasesCurrentPage === 1;
+            btnNext.disabled = purchasesCurrentPage === totalPages || totalPages === 0;
+
+            btnPrev.style.opacity = purchasesCurrentPage === 1 ? '0.5' : '1';
+            btnNext.style.opacity = (purchasesCurrentPage === totalPages || totalPages === 0) ? '0.5' : '1';
+
+            ui.refreshIcons();
+        }
+
+        function changePurchasesPage(direction) {
+            purchasesCurrentPage += direction;
+            renderPurchases();
+        }
 
         async function loadPurchases() {
             try {
-                const response = await api.purchases.getAll();
-                const tbody = document.getElementById('purchases-body');
-                tbody.innerHTML = '';
-
-                response.data.forEach(p => {
-                    const row = `
-                        <tr>
-                            <td class="mono" style="color: var(--accent); font-weight: 600;">${p.invoiceNumber}</td>
-                            <td style="color: var(--text-muted)">${new Date(p.purchaseDate).toLocaleDateString()}</td>
-                            <td><span style="background: var(--bg-hover); padding: 4px 8px; border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;">${p.items.length} SKUs</span></td>
-                            <td class="mono" style="font-weight: 600;">NPR ${p.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                            <td style="color: var(--text-dim); font-size: 0.8rem;">${p.notes || '--'}</td>
-                        </tr>
-                    `;
-                    tbody.insertAdjacentHTML('beforeend', row);
-                });
-                ui.refreshIcons();
+                const response = await api.restocks.getAll();
+                allPurchasesList = response.data || [];
+                purchasesCurrentPage = 1;
+                renderPurchases();
             } catch (err) {
                 ui.showToast(err.message, 'error');
             }
@@ -234,10 +288,6 @@
                         <div class="col-header">Qty</div>
                         <input type="number" class="qty-input mono" min="1" value="1" oninput="updateRowTotal('${rowId}')">
                     </div>
-                    <div>
-                        <div class="col-header">Cost / Unit (NPR)</div>
-                        <input type="number" class="price-input mono" min="0.01" step="0.01" value="0.00" oninput="updateRowTotal('${rowId}')">
-                    </div>
                     <div style="text-align: right;">
                         <div class="col-header">Line Total</div>
                         <div class="row-total mono" style="font-weight: 700; color: #fff; padding-top: 8px;">NPR 0.00</div>
@@ -267,14 +317,14 @@
             const row = document.getElementById(`row-${id}`);
             const sel = row.querySelector('.part-select');
             const qty = parseInt(row.querySelector('.qty-input').value) || 0;
-            const pri = row.querySelector('.price-input');
 
-            if (parseFloat(pri.value) === 0 && sel.value) {
+            let unitPrice = 0;
+            if (sel.value) {
                 const opt = sel.options[sel.selectedIndex];
-                pri.value = opt.getAttribute('data-price');
+                unitPrice = parseFloat(opt.getAttribute('data-price')) || 0;
             }
 
-            const total = qty * (parseFloat(pri.value) || 0);
+            const total = qty * unitPrice;
             row.querySelector('.row-total').textContent = `NPR ${total.toFixed(2)}`;
             updateGrandTotal();
         }
@@ -282,9 +332,14 @@
         function updateGrandTotal() {
             let grand = 0;
             document.querySelectorAll('.purchase-row').forEach(row => {
+                const sel = row.querySelector('.part-select');
                 const qty = parseInt(row.querySelector('.qty-input').value) || 0;
-                const pri = parseFloat(row.querySelector('.price-input').value) || 0;
-                grand += (qty * pri);
+                let unitPrice = 0;
+                if (sel && sel.value) {
+                    const opt = sel.options[sel.selectedIndex];
+                    unitPrice = parseFloat(opt.getAttribute('data-price')) || 0;
+                }
+                grand += (qty * unitPrice);
             });
             document.getElementById('grand-total').textContent = `NPR ${grand.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         }
@@ -294,27 +349,35 @@
             const rows = document.querySelectorAll('.purchase-row');
 
             for (const r of rows) {
-                const id = parseInt(r.querySelector('.part-select').value);
+                const sel = r.querySelector('.part-select');
+                const id = parseInt(sel.value);
                 const q = parseInt(r.querySelector('.qty-input').value);
-                const p = parseFloat(r.querySelector('.price-input').value);
 
                 if (!id) {
                     ui.showToast('Empty selection in line items.', 'error');
                     return;
                 }
-                items.push({ partId: id, quantity: q, unitPrice: p });
+
+                const opt = sel.options[sel.selectedIndex];
+                const unitPrice = parseFloat(opt.getAttribute('data-price')) || 0;
+
+                items.push({ partId: id, quantity: q, unitPrice: unitPrice });
             }
 
             try {
-                const res = await api.purchases.create({ notes: document.getElementById('purchase-notes').value, items: items });
-                ui.showToast('Invoice finalized.');
+                const res = await api.restocks.create({ notes: document.getElementById('purchase-notes').value, items: items });
+                ui.showToast('Restock invoice finalized.');
                 hideNewPurchase();
             } catch (err) {
                 ui.showToast(err.message, 'error');
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadPurchases);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireAdmin()) return;
+            ui.setupStaffSidebar('purchases.html');
+            loadPurchases();
+        });
     </script>
 </body>
 

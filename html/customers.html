@@ -19,7 +19,7 @@
             <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
             <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
             <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
-            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Restock</a></li>
             <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
             <li><a href="customers.html" class="active"><i data-lucide="user"></i> Customers</a></li>
             <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
@@ -60,138 +60,231 @@
             </div>
         </div>
 
-        <div class="toolbar">
-            <div class="form-group" style="min-width: 340px;">
-                <label>Search Customer</label>
-                <input type="text" id="customer-search-input"
-                    placeholder="Name, email, phone, customer ID, or vehicle number..."
-                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); searchCustomers(); }">
-            </div>
-            <div style="display: flex; gap: 1px; background: var(--border-bright);">
-                <button class="btn btn-primary" onclick="searchCustomers()">
-                    <i data-lucide="search" style="width: 14px;"></i> Search
-                </button>
-                <button class="btn btn-secondary" onclick="clearWorkspace()">
-                    <i data-lucide="x" style="width: 14px;"></i> Clear
-                </button>
-            </div>
+        <!-- Sub-navigation Tabs -->
+        <div class="sub-nav"
+            style="margin-bottom: 2rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1px;">
+            <button id="tab-directory" class="tab-btn active" onclick="switchTab('directory')"
+                style="background: none; border: none; padding: 12px 16px; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-bottom: 2px solid var(--accent); transition: all 0.2s;">
+                <i data-lucide="users"
+                    style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Customer
+                Directory & Intelligence
+            </button>
+            <button id="tab-workspace" class="tab-btn" onclick="switchTab('workspace')"
+                style="background: none; border: none; padding: 12px 16px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">
+                <i data-lucide="user-check"
+                    style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Customer
+                Workspace & History
+            </button>
         </div>
 
-        <div
-            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
-            Search Results</div>
-        <div class="card-elegant" style="margin-bottom: 2rem;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Customer</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Vehicle Snapshot</th>
-                        <th style="width: 120px; text-align: right;">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="customer-search-body"></tbody>
-            </table>
-        </div>
-
-        <div class="profile-grid">
-            <div class="profile-cell">
-                <div class="profile-label">Customer</div>
-                <div id="profile-name" class="profile-value">--</div>
-            </div>
-            <div class="profile-cell">
-                <div class="profile-label">Email</div>
-                <div id="profile-email" class="profile-value">--</div>
-            </div>
-            <div class="profile-cell">
-                <div class="profile-label">Phone</div>
-                <div id="profile-phone" class="profile-value">--</div>
-            </div>
-            <div class="profile-cell">
-                <div class="profile-label">Customer Since</div>
-                <div id="profile-since" class="profile-value">--</div>
-            </div>
-            <div class="profile-cell" style="grid-column: 1 / -1;">
-                <div class="profile-label">Address</div>
-                <div id="profile-address" class="profile-value">--</div>
-            </div>
-        </div>
-
-        <div
-            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
-            Vehicle Information</div>
-        <div class="card-elegant" style="margin-bottom: 2rem;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Vehicle Number</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Year</th>
-                        <th>Fuel Type</th>
-                    </tr>
-                </thead>
-                <tbody id="vehicle-history-body"></tbody>
-            </table>
-        </div>
-
-        <div
-            style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
-            <div
-                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
-                Purchase History</div>
-            <div class="history-filter">
-                <div class="form-group">
-                    <label>Filter Purchases</label>
-                    <input type="text" id="purchase-filter" placeholder="Invoice number or part name..." oninput="renderPurchaseHistory()">
+        <!-- Directory Section -->
+        <div id="directory-section">
+            <!-- Stats Cards Row -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-label">Total Customers</div>
+                            <div id="stat-total-customers" class="stat-value">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--accent);"><i data-lucide="users"></i></div>
+                    </div>
                 </div>
-                <div class="form-group" style="min-width: 180px;">
-                    <label>Payment Type</label>
-                    <select id="purchase-credit-filter" onchange="renderPurchaseHistory()">
-                        <option value="all">All</option>
-                        <option value="cash">Cash</option>
-                        <option value="credit">Credit</option>
+                <div class="stat-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-label">Regular Customers</div>
+                            <div id="stat-regular-customers" class="stat-value">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: #10b981;"><i data-lucide="award"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-label">Top Spenders</div>
+                            <div id="stat-top-spenders" class="stat-value">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: #f59e0b;"><i data-lucide="trending-up"></i></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Toolbar Filters -->
+            <div class="toolbar" style="margin-bottom: 1.5rem;">
+                <div class="form-group" style="min-width: 200px;">
+                    <label>Filter Segment</label>
+                    <select id="filter-segment" onchange="filterDirectory()">
+                        <option value="all">All Customers</option>
+                        <option value="regular">Regular Customers (5+ Appts)</option>
+                        <option value="spender">High Spenders (> NPR 10,000)</option>
+                        <option value="credit">With Pending Credit</option>
                     </select>
                 </div>
+
+                <div class="form-group" style="min-width: 180px;">
+                    <label>Sort By</label>
+                    <select id="sort-directory" onchange="filterDirectory()">
+                        <option value="spending-desc">Highest Spending</option>
+                        <option value="spending-asc">Lowest Spending</option>
+                        <option value="appts-desc">Most Appointments</option>
+                        <option value="name-asc">Name (A - Z)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex-grow: 1; min-width: 250px;">
+                    <label>Search Directory</label>
+                    <input type="text" id="directory-search" placeholder="Type name, email, or vehicle snapshot..."
+                        oninput="filterDirectory()">
+                </div>
+            </div>
+
+            <!-- Customer Directory List -->
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Info</th>
+                            <th>Vehicle Snapshot</th>
+                            <th>Appointments</th>
+                            <th>Total Spending</th>
+                            <th>Payment Status</th>
+                            <th style="width: 140px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="directory-table-body">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+                <div class="pagination-controls" id="directory-pagination"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);" id="directory-page-info">
+                        Showing 0 entries
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" id="btn-dir-prev" onclick="changeDirectoryPage(-1)"
+                            style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                        <button class="btn btn-secondary" id="btn-dir-next" onclick="changeDirectoryPage(1)"
+                            style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card-elegant" style="margin-bottom: 2rem;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Invoice</th>
-                        <th>Date</th>
-                        <th>Subtotal</th>
-                        <th>Discount</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th style="width: 100px; text-align: right;">Items</th>
-                    </tr>
-                </thead>
-                <tbody id="purchase-history-body"></tbody>
-            </table>
-        </div>
 
-        <div
-            style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+        <!-- Single Profile Workspace Section -->
+        <div id="workspace-section" style="display: none;">
+            <div class="toolbar" style="margin-bottom: 2rem;">
+                <div class="form-group" style="min-width: 400px; max-width: 600px;">
+                    <label>Select Customer Workspace</label>
+                    <select id="workspace-customer-select"
+                        onchange="if(this.value) loadCustomerDetails(parseInt(this.value)); else resetDetailsViews();">
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="clearWorkspace()">
+                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Reset Workspace
+                </button>
+            </div>
+
+            <div class="profile-grid">
+                <div class="profile-cell">
+                    <div class="profile-label">Customer</div>
+                    <div id="profile-name" class="profile-value">--</div>
+                </div>
+                <div class="profile-cell">
+                    <div class="profile-label">Email</div>
+                    <div id="profile-email" class="profile-value">--</div>
+                </div>
+                <div class="profile-cell">
+                    <div class="profile-label">Phone</div>
+                    <div id="profile-phone" class="profile-value">--</div>
+                </div>
+                <div class="profile-cell">
+                    <div class="profile-label">Customer Since</div>
+                    <div id="profile-since" class="profile-value">--</div>
+                </div>
+                <div class="profile-cell" style="grid-column: 1 / -1;">
+                    <div class="profile-label">Address</div>
+                    <div id="profile-address" class="profile-value">--</div>
+                </div>
+            </div>
+
             <div
-                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
-                Service History</div>
-            <span id="service-availability-pill" class="status-pill warning">No service data</span>
-        </div>
-        <div class="card-elegant">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Service Type</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                        <th>Cost</th>
-                    </tr>
-                </thead>
-                <tbody id="service-history-body"></tbody>
-            </table>
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+                Vehicle Information</div>
+            <div class="card-elegant" style="margin-bottom: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vehicle Number</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Year</th>
+                            <th>Fuel Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicle-history-body"></tbody>
+                </table>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                    Purchase History</div>
+                <div class="history-filter">
+                    <div class="form-group">
+                        <label>Filter Purchases</label>
+                        <input type="text" id="purchase-filter" placeholder="Invoice number or part name..."
+                            oninput="renderPurchaseHistory()">
+                    </div>
+                    <div class="form-group" style="min-width: 180px;">
+                        <label>Payment Type</label>
+                        <select id="purchase-credit-filter" onchange="renderPurchaseHistory()">
+                            <option value="all">All</option>
+                            <option value="cash">Cash</option>
+                            <option value="credit">Credit</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-elegant" style="margin-bottom: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                            <th>Subtotal</th>
+                            <th>Discount</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th style="width: 100px; text-align: right;">Items</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchase-history-body"></tbody>
+                </table>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                    Service History</div>
+                <span id="service-availability-pill" class="status-pill warning">No service data</span>
+            </div>
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service Type</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="service-history-body"></tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -201,7 +294,8 @@
         <div class="modal" style="max-width: 650px;">
             <h2 id="modal-title">Register Customer</h2>
             <form id="register-form">
-                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
                     Customer Profile Details
                 </div>
                 <div class="form-grid" style="margin-bottom: 1.5rem;">
@@ -223,7 +317,8 @@
                     </div>
                 </div>
 
-                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
                     Vehicle Information
                 </div>
                 <div class="form-grid" style="margin-bottom: 2rem;">
@@ -455,25 +550,15 @@
             renderServiceHistory();
         }
 
-        async function searchCustomers() {
-            const term = document.getElementById('customer-search-input').value.trim();
-            if (!term) {
-                ui.showToast('Enter a search term first.', 'error');
-                return;
-            }
-
-            try {
-                const response = await api.customers.search(term);
-                searchResults = response.data || [];
-                renderSearchResults();
-
-                if (!searchResults.length) {
-                    ui.showToast(response.message || 'No customer matched the search term.', 'error');
-                }
-            } catch (err) {
-                const message = err.errors?.length ? err.errors[0] : err.message;
-                ui.showToast(message || 'Customer search failed.', 'error');
-            }
+        function populateWorkspaceDropdown() {
+            const select = document.getElementById('workspace-customer-select');
+            select.innerHTML = '<option value="">-- Select Customer --</option>';
+            directoryData.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.customerId;
+                opt.textContent = `${c.fullName} | ${c.email} | ${c.phoneNumber}`;
+                select.appendChild(opt);
+            });
         }
 
         async function loadCustomerDetails(customerId) {
@@ -513,11 +598,7 @@
         }
 
         function clearWorkspace() {
-            searchResults = [];
-            document.getElementById('customer-search-input').value = '';
-            document.getElementById('purchase-filter').value = '';
-            document.getElementById('purchase-credit-filter').value = 'all';
-            renderSearchResults();
+            document.getElementById('workspace-customer-select').value = '';
             resetDetailsViews();
         }
 
@@ -549,10 +630,10 @@
                 const response = await api.customers.staffRegister(data);
                 ui.showToast('Customer and vehicle registered successfully!');
                 ui.hideModal('register-modal');
-                
+
                 // Clear the form
                 document.getElementById('register-form').reset();
-                
+
                 // Set the search input to the new customer name and trigger search to display them
                 document.getElementById('customer-search-input').value = data.fullName;
                 await searchCustomers();
@@ -562,8 +643,192 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        let directoryData = [];
+        let filteredDirectoryData = [];
+        let dirCurrentPage = 1;
+        const dirItemsPerPage = 5;
+
+        async function fetchDirectory() {
+            try {
+                const response = await api.reports.getCustomerIntelligence();
+                directoryData = response.data || [];
+                updateDirectoryStats();
+                filterDirectory();
+                populateWorkspaceDropdown();
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg || 'Failed to load customer intelligence directory.', 'error');
+            }
+        }
+
+        function updateDirectoryStats() {
+            const total = directoryData.length;
+            const regulars = directoryData.filter(c => c.isRegular).length;
+            const spenders = directoryData.filter(c => c.totalAmountSpent > 10000).length;
+
+            document.getElementById('stat-total-customers').textContent = total;
+            document.getElementById('stat-regular-customers').textContent = regulars;
+            document.getElementById('stat-top-spenders').textContent = spenders;
+        }
+
+        function filterDirectory() {
+            const segment = document.getElementById('filter-segment').value;
+            const sortBy = document.getElementById('sort-directory').value;
+            const term = document.getElementById('directory-search').value.toLowerCase().trim();
+
+            let filtered = [...directoryData];
+
+            // 1. Filter by search term
+            if (term) {
+                filtered = filtered.filter(c =>
+                    c.fullName.toLowerCase().includes(term) ||
+                    c.email.toLowerCase().includes(term) ||
+                    c.phoneNumber.toLowerCase().includes(term) ||
+                    c.vehicleSnapshot.toLowerCase().includes(term)
+                );
+            }
+
+            // 2. Filter by segment
+            if (segment === 'regular') {
+                filtered = filtered.filter(c => c.isRegular);
+            } else if (segment === 'spender') {
+                filtered = filtered.filter(c => c.totalAmountSpent > 10000);
+            } else if (segment === 'credit') {
+                filtered = filtered.filter(c => c.totalCreditOwed > 0);
+            }
+
+            // 4. Sort
+            if (sortBy === 'spending-desc') {
+                filtered.sort((a, b) => b.totalAmountSpent - a.totalAmountSpent);
+            } else if (sortBy === 'spending-asc') {
+                filtered.sort((a, b) => a.totalAmountSpent - b.totalAmountSpent);
+            } else if (sortBy === 'appts-desc') {
+                filtered.sort((a, b) => b.appointmentCount - a.appointmentCount);
+            } else if (sortBy === 'name-asc') {
+                filtered.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            }
+
+            filteredDirectoryData = filtered;
+            dirCurrentPage = 1;
+            renderDirectory(filteredDirectoryData);
+        }
+
+        function changeDirectoryPage(delta) {
+            const totalPages = Math.ceil(filteredDirectoryData.length / dirItemsPerPage);
+            const newPage = dirCurrentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                dirCurrentPage = newPage;
+                renderDirectory(filteredDirectoryData);
+            }
+        }
+
+        function renderDirectory(data) {
+            const tbody = document.getElementById('directory-table-body');
+            const startIdx = (dirCurrentPage - 1) * dirItemsPerPage;
+            const endIdx = startIdx + dirItemsPerPage;
+            const paginatedData = data.slice(startIdx, endIdx);
+
+            tbody.innerHTML = paginatedData.length ? '' : emptyRow(6, 'No customers match the active filters.');
+
+            paginatedData.forEach(c => {
+                const statusType = c.paymentStatusSummary === 'Credit Pending' ? 'warning' : 'success';
+
+                const regularPill = c.isRegular
+                    ? `<span class="status-pill success" style="margin-left: 8px;"><i data-lucide="award" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-right: 2px;"></i>Regular</span>`
+                    : '';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>
+                            <div>
+                                <div style="font-weight: 600; color: #fff;">${c.fullName}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${c.email} • ${c.phoneNumber}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.8rem; color: var(--accent); font-weight: 500;">${c.vehicleSnapshot}</div>
+                        </td>
+                        <td class="mono">
+                            <span style="font-weight: 600;">${c.appointmentCount}</span>
+                            ${regularPill}
+                        </td>
+                        <td class="mono" style="font-weight: 600; color: #fff;">${money(c.totalAmountSpent)}</td>
+                        <td>${statusBadge(c.paymentStatusSummary, statusType)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="inspectCustomer(${c.customerId})">
+                                <i data-lucide="eye" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Workspace
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
             ui.refreshIcons();
+
+            // Update pagination controls
+            const totalItems = data.length;
+            const totalPages = Math.ceil(totalItems / dirItemsPerPage);
+
+            const infoEl = document.getElementById('directory-page-info');
+            if (infoEl) {
+                infoEl.textContent = totalItems === 0
+                    ? 'Showing 0 entries'
+                    : `Showing ${startIdx + 1} to ${Math.min(endIdx, totalItems)} of ${totalItems} entries`;
+            }
+
+            const btnPrev = document.getElementById('btn-dir-prev');
+            const btnNext = document.getElementById('btn-dir-next');
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = dirCurrentPage === 1;
+                btnNext.disabled = dirCurrentPage === totalPages || totalPages === 0;
+
+                btnPrev.style.opacity = dirCurrentPage === 1 ? '0.5' : '1';
+                btnNext.style.opacity = (dirCurrentPage === totalPages || totalPages === 0) ? '0.5' : '1';
+            }
+        }
+
+        function inspectCustomer(customerId) {
+            switchTab('workspace');
+
+            // Set the dropdown to the selected customer and load details
+            const customer = directoryData.find(c => c.customerId === customerId);
+            if (customer) {
+                document.getElementById('workspace-customer-select').value = customerId;
+                loadCustomerDetails(customerId);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = 'var(--text-muted)';
+                btn.style.borderBottomColor = 'transparent';
+            });
+
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.style.color = '#fff';
+                activeBtn.style.borderBottomColor = 'var(--accent)';
+            }
+
+            if (tabId === 'directory') {
+                document.getElementById('directory-section').style.display = 'block';
+                document.getElementById('workspace-section').style.display = 'none';
+                fetchDirectory();
+            } else {
+                document.getElementById('directory-section').style.display = 'none';
+                document.getElementById('workspace-section').style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            ui.setupStaffSidebar('customers.html');
+            ui.refreshIcons();
+
+            // Default to Directory tab and fetch customers
+            switchTab('directory');
             clearWorkspace();
         });
     </script>

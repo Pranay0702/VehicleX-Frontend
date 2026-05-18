@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="customer-dashboard.html" class="active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            </li>
+            <li><a href="customer-profile.html"><i data-lucide="user"></i> My Profile</a></li>
+            <li><a href="customer-history.html"><i data-lucide="history"></i> My History</a></li>
+            <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
+            <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
+            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="avatar-initials"
+                        style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                        CU</div>
+                    <div>
+                        <div id="customer-display-name" style="font-size: 0.75rem; font-weight: 600; color: #fff;">
+                            Customer</div>
+                        <div
+                            style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                            Portal User</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="logoutCustomer()"
+                style="width: 100%; border-color: var(--error); color: var(--error); padding: 8px;">
+                <i data-lucide="log-out" style="width: 14px;"></i> Log Out
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Overview</div>
+                    <h1 id="welcome-message">Welcome Back</h1>
+                </div>
+                <a href="customer-requests.html" class="btn btn-primary" style="text-decoration: none;">
+                    <i data-lucide="calendar" style="width: 14px;"></i> Book Service
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-label">Registered Vehicles</div>
+                <div id="stat-vehicles" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Service Appointments</div>
+                <div id="stat-services" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Parts Purchased</div>
+                <div id="stat-purchases" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Spent</div>
+                <div id="stat-spent" class="stat-value">--</div>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+            Recent Service Activity</div>
+        <div class="card-elegant" style="margin-bottom: 2rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Service Type</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-services-body">
+                    <tr>
+                        <td colspan="4" class="muted-empty">Loading recent activity...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Pagination Controls -->
+            <div id="pagination-controls" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
+                <div id="pagination-info">Showing 0-0 of 0 activities</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" id="btn-prev" onclick="prevPage()" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;"><i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> Prev</button>
+                    <button class="btn btn-secondary" id="btn-next" onclick="nextPage()" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">Next <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let customerId = null;
+
+        function logoutCustomer() {
+            api.customers.logout();
+            window.location.href = 'login.html';
+        }
+
+        async function initPage() {
+            try {
+                const response = await api.customers.getProfile();
+                const data = response.data || response;
+                customerId = data.id;
+
+                const name = data.fullName || 'Valued Customer';
+                document.getElementById('customer-display-name').textContent = name;
+                document.getElementById('welcome-message').textContent = `Welcome back, ${name.split(' ')[0]}`;
+
+                const nameParts = name.split(' ');
+                const initials = nameParts.map(p => p[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+                document.getElementById('avatar-initials').textContent = initials;
+
+                if (customerId) {
+                    await loadDashboardData();
+                }
+            } catch (err) {
+                if (err.message && err.message.toLowerCase().includes('unauthorized')) {
+                    ui.showToast('Session expired or unauthorized. Logging out...', 'error');
+                    logoutCustomer();
+                } else {
+                    ui.showToast(err.message || 'Failed to load profile.', 'error');
+                }
+            }
+        }
+
+        let services = [];
+        let currentPage = 1;
+        const pageSize = 5;
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderServicesPage();
+            }
+        }
+
+        function nextPage() {
+            const maxPage = Math.ceil(services.length / pageSize);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderServicesPage();
+            }
+        }
+
+        function renderServicesPage() {
+            const tbody = document.getElementById('recent-services-body');
+            tbody.innerHTML = '';
+
+            const total = services.length;
+            if (total === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="muted-empty">No recent services.</td></tr>';
+                document.getElementById('pagination-controls').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('pagination-controls').style.display = 'flex';
+            const maxPage = Math.ceil(total / pageSize);
+            
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > maxPage) currentPage = maxPage;
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, total);
+            const pageData = services.slice(startIdx, endIdx);
+
+            pageData.forEach(srv => {
+                const status = srv.appointmentStatusName || 'Pending';
+                const statusColor = status === 'Pending' || status === 'Confirmed' ? 'var(--warning)' :
+                    status === 'Completed' ? 'var(--success)' : 'var(--error)';
+                
+                const dateStr = srv.appointmentDateUtc ? new Date(srv.appointmentDateUtc).toLocaleDateString() : 'Invalid Date';
+                const vehicleStr = srv.vehicleMake && srv.vehicleModel ? `${srv.vehicleMake} ${srv.vehicleModel} (${srv.vehicleRegistrationNumber || ''})` : '--';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="mono">${dateStr}</td>
+                        <td style="font-weight: 500;">${srv.serviceType}</td>
+                        <td>${vehicleStr}</td>
+                        <td>
+                            <span style="font-size: 0.65rem; font-weight: 700; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 2px 6px; text-transform: uppercase;">
+                                ${status}
+                            </span>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            document.getElementById('pagination-info').textContent = `Showing ${startIdx + 1}-${endIdx} of ${total} activities`;
+            document.getElementById('btn-prev').disabled = currentPage === 1;
+            document.getElementById('btn-next').disabled = currentPage === maxPage;
+
+            ui.refreshIcons();
+        }
+
+        async function loadDashboardData() {
+            try {
+                const [vRes, sRes, pRes] = await Promise.all([
+                    api.customers.getVehicles(),
+                    api.portal.getServices(),
+                    api.portal.getPurchases()
+                ]);
+
+                const vehicles = vRes.data || vRes || [];
+                services = sRes.data || sRes || [];
+                const purchases = pRes.data || pRes || [];
+
+                document.getElementById('stat-vehicles').textContent = vehicles.length;
+                document.getElementById('stat-services').textContent = services.length;
+                document.getElementById('stat-purchases').textContent = purchases.length;
+
+                // Fix totalSpent calculation using totalAmount instead of grandTotal
+                const totalSpent = purchases.reduce((acc, pur) => acc + (pur.totalAmount || 0), 0);
+                document.getElementById('stat-spent').textContent = `NPR ${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+                currentPage = 1;
+                renderServicesPage();
+            } catch (err) {
+                ui.showToast('Failed to load dashboard data.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('customerToken')) {
+                window.location.href = 'login.html';
+                return;
+            }
+            ui.refreshIcons();
+            initPage();
+        });
+    </script>
+</body>
+
+</html>

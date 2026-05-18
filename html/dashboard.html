@@ -19,7 +19,7 @@
             <li><a href="dashboard.html" class="active"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
             <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
             <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
-            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Restock</a></li>
             <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
             <li><a href="customers.html"><i data-lucide="user"></i> Customers</a></li>
             <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
@@ -100,46 +100,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            ui.refreshIcons();
-            try {
-                const [vResponse, pResponse, purResponse] = await Promise.all([
-                    api.vendors.getAll(),
-                    api.parts.getAll(),
-                    api.purchases.getAll()
-                ]);
-
-                const vendors = vResponse.data || [];
-                const parts = pResponse.data || [];
-                const purchases = purResponse.data || [];
-
-                document.getElementById('stat-vendors').textContent = vendors.length;
-                document.getElementById('stat-parts').textContent = parts.length;
-                document.getElementById('stat-purchases').textContent = purchases.length;
-
-                const val = parts.reduce((acc, p) => acc + (p.price * p.stockQuantity), 0);
-                document.getElementById('stat-value').textContent = `NPR ${val.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-                const tbody = document.getElementById('recent-purchases-body');
-                if (purchases.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 4rem; font-size: 0.8rem;">NO RECENT ACTIVITY LOGGED</td></tr>';
-                } else {
-                    purchases.slice(0, 10).forEach(pur => {
-                        const row = `
-                            <tr>
-                                <td class="mono" style="color: var(--accent); font-weight: 500;">${pur.invoiceNumber}</td>
-                                <td style="color: var(--text-muted)">${new Date(pur.purchaseDate).toLocaleDateString()}</td>
-                                <td class="mono">NPR ${pur.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                <td><span style="font-size: 0.65rem; font-weight: 700; color: var(--success); border: 1px solid var(--success); padding: 2px 6px; text-transform: uppercase;">Finalized</span></td>
-                                <td style="color: var(--text-dim); font-size: 0.8rem;">${pur.notes || '--'}</td>
-                            </tr>
-                        `;
-                        tbody.insertAdjacentHTML('beforeend', row);
-                    });
-                }
-            } catch (err) {
-                ui.showToast('Data synchronization failed.', 'error');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            api.auth.redirectToDashboard();
         });
     </script>
 </body>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Center | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--text-bright);
+            border-bottom: 2px solid var(--accent);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="customer-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="customer-profile.html"><i data-lucide="user"></i> My Portal</a></li>
+            <li><a href="customer-history.html"><i data-lucide="history"></i> My History</a></li>
+            <li><a href="customer-requests.html" class="active"><i data-lucide="calendar-check"></i> Service Center</a></li>
+            <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
+            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="avatar-initials"
+                        style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                        CU</div>
+                    <div>
+                        <div id="customer-display-name" style="font-size: 0.75rem; font-weight: 600; color: #fff;">
+                            Customer</div>
+                        <div
+                            style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                            Portal User</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="logoutCustomer()"
+                style="width: 100%; border-color: var(--error); color: var(--error); padding: 8px;">
+                <i data-lucide="log-out" style="width: 14px;"></i> Log Out
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Dashboard</div>
+                    <h1>Service Center</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-target="tab-appointment">Book Appointment</div>
+            <div class="tab" data-target="tab-part-request">Request Part</div>
+            <div class="tab" data-target="tab-review">Submit Review</div>
+        </div>
+
+        <!-- Appointment Tab -->
+        <div id="tab-appointment" class="tab-content active">
+            <div class="card-elegant" style="padding: 2rem; max-width: 600px;">
+                <form id="appointment-form">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Select Registered Vehicle *</label>
+                        <select id="appt-vehicle" required>
+                            <option value="">-- Select a Vehicle --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Preferred Date & Time *</label>
+                        <input type="datetime-local" id="appt-date" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Service Type *</label>
+                        <input type="text" id="appt-type" required placeholder="e.g. Full Servicing, Oil Change">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label>Additional Notes</label>
+                        <textarea id="appt-notes" placeholder="Describe any issues..."
+                            style="min-height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i data-lucide="calendar" style="width: 16px;"></i> Book Appointment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Part Request Tab -->
+        <div id="tab-part-request" class="tab-content">
+            <div class="card-elegant" style="padding: 2rem; max-width: 600px;">
+                <div style="margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                    Can't find a specific part in our inventory? Request it here and our staff will source it for you.
+                </div>
+                <form id="part-request-form">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Requested Part Name *</label>
+                        <input type="text" id="req-part-name" required placeholder="e.g. Custom Alloy Wheels">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Required Quantity *</label>
+                        <input type="number" id="req-qty" required min="1" value="1" class="mono">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label>Description / Manufacturer</label>
+                        <textarea id="req-desc" placeholder="Any specific brand or technical details..."
+                            style="min-height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i data-lucide="send" style="width: 16px;"></i> Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Review Tab -->
+        <div id="tab-review" class="tab-content">
+            <div class="card-elegant" style="padding: 2rem; max-width: 600px;">
+                <form id="review-form">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Rating (1 to 5 Stars) *</label>
+                        <select id="rev-rating" required>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Average</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Terrible</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label>Your Feedback *</label>
+                        <textarea id="rev-comment" required placeholder="Tell us about your experience..."
+                            style="min-height: 100px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i data-lucide="star" style="width: 16px;"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let customerId = null;
+
+        function logoutCustomer() {
+            api.customers.logout();
+            window.location.href = 'login.html';
+        }
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.target).classList.add('active');
+            });
+        });
+
+        async function initPage() {
+            try {
+                // Fetch profile
+                const response = await api.customers.getProfile();
+                const data = response.data || response;
+                customerId = data.id;
+
+                document.getElementById('customer-display-name').textContent = data.fullName || 'Valued Customer';
+                const nameParts = (data.fullName || '').split(' ');
+                const initials = nameParts.map(p => p[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+                document.getElementById('avatar-initials').textContent = initials;
+
+                // Load vehicles for appointment dropdown
+                loadVehicles();
+            } catch (err) {
+                if (err.message && err.message.toLowerCase().includes('unauthorized')) {
+                    ui.showToast('Session expired or unauthorized. Logging out...', 'error');
+                    logoutCustomer();
+                } else {
+                    ui.showToast(err.message || 'Failed to load profile.', 'error');
+                }
+            }
+        }
+
+        async function loadVehicles() {
+            try {
+                const res = await api.customers.getVehicles();
+                const vehicles = res.data || res || [];
+                const select = document.getElementById('appt-vehicle');
+                select.innerHTML = '<option value="">-- Select a Vehicle --</option>';
+
+                vehicles.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = `${v.brand} ${v.model} (${v.vehicleNumber})`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                ui.showToast('Failed to load registered vehicles.', 'error');
+            }
+        }
+
+        // Handle Appointment Booking
+        document.getElementById('appointment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                vehicleId: parseInt(document.getElementById('appt-vehicle').value),
+                appointmentDateUtc: new Date(document.getElementById('appt-date').value).toISOString(),
+                serviceType: document.getElementById('appt-type').value.trim(),
+                notes: document.getElementById('appt-notes').value.trim() || null
+            };
+
+            try {
+                await api.portal.bookAppointment(data);
+                ui.showToast('Appointment booked successfully!');
+                document.getElementById('appointment-form').reset();
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg || 'Failed to book appointment.', 'error');
+            }
+        });
+
+        // Handle Part Request
+        document.getElementById('part-request-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                partName: document.getElementById('req-part-name').value.trim(),
+                quantity: parseInt(document.getElementById('req-qty').value),
+                notes: document.getElementById('req-desc').value.trim() || null
+            };
+
+            try {
+                await api.portal.requestPart(data);
+                ui.showToast('Part request submitted successfully!');
+                document.getElementById('part-request-form').reset();
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg || 'Failed to submit part request.', 'error');
+            }
+        });
+
+        // Handle Review Submission
+        document.getElementById('review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                rating: parseInt(document.getElementById('rev-rating').value),
+                comment: document.getElementById('rev-comment').value.trim()
+            };
+
+            try {
+                await api.portal.submitReview(data);
+                ui.showToast('Thank you for your feedback!');
+                document.getElementById('review-form').reset();
+            } catch (err) {
+                const msg = err.errors?.length ? err.errors[0] : err.message;
+                ui.showToast(msg || 'Failed to submit review.', 'error');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireCustomer()) return;
+            if (localStorage.getItem('staffToken')) localStorage.removeItem('staffToken');
+            ui.refreshIcons();
+            initPage();
+        });
+    </script>
+</body>
+
+</html>

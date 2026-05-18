@@ -19,7 +19,7 @@
             <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
             <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
             <li><a href="parts.html" class="active"><i data-lucide="package"></i> Parts</a></li>
-            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Restock</a></li>
             <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
             <li><a href="customers.html"><i data-lucide="user"></i> Customers</a></li>
             <li><a href="customer-services.html"><i data-lucide="calendar-check"></i> Customer Services</a></li>
@@ -64,7 +64,7 @@
                         <th>Source Vendor</th>
                         <th>MSRP (NPR)</th>
                         <th>Availability</th>
-                        <th style="width: 120px; text-align: right;">Actions</th>
+                        <th id="th-actions" style="width: 120px; text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="parts-body">
@@ -151,7 +151,7 @@
                                     <span class="mono" style="font-size: 0.8rem; font-weight: 600; color: ${p.stockQuantity < 10 ? 'var(--error)' : '#fff'}">${p.stockQuantity}</span>
                                 </div>
                             </td>
-                            <td style="text-align: right;">
+                            <td class="td-actions" style="text-align: right;">
                                 <div style="display: flex; gap: 4px; justify-content: flex-end;">
                                     <button class="btn btn-secondary" onclick="editPart(${p.id})" style="padding: 6px;">
                                         <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
@@ -165,6 +165,11 @@
                     `;
                     tbody.insertAdjacentHTML('beforeend', row);
                 });
+                
+                if (window.hideActions) {
+                    document.querySelectorAll('.td-actions').forEach(td => td.style.display = 'none');
+                }
+                
                 ui.refreshIcons();
             } catch (err) {
                 ui.showToast(err.message, 'error');
@@ -255,7 +260,26 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', loadParts);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            ui.setupStaffSidebar('parts.html');
+
+            const user = api.staff.getLoggedInUser();
+            if (user?.role !== 'Admin') {
+                // Hide Add button
+                const addBtn = document.querySelector('button[onclick="showPartModal()"]');
+                if (addBtn) addBtn.style.display = 'none';
+
+                // We also need to hide the Actions column header.
+                const thActions = document.getElementById('th-actions');
+                if (thActions) thActions.style.display = 'none';
+                
+                // Set a global flag so loadParts knows to hide the td-actions
+                window.hideActions = true;
+            }
+
+            loadParts();
+        });
     </script>
 </body>
 

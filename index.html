@@ -4,64 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VehicleX | Hub</title>
+    <title>VehicleX | Enterprise Parts & Workshop Management</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 2rem;
+            justify-content: flex-start;
+            padding: 0;
+            background-color: var(--bg-page);
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        .hub-container {
-            max-width: 1000px;
+        /* Hero / Landing container */
+        .landing-container {
+            max-width: 1100px;
             width: 100%;
+            padding: 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
         }
 
-        .hub-header {
+        /* Branding header */
+        .landing-header {
             text-align: center;
-            margin-bottom: 0;
-        }
-
-        .hub-header .logo {
-            display: inline-flex;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 16px;
+            margin-top: 1rem;
         }
 
-        .hub-header h1 {
+        .landing-logo {
+            height: 140px;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .landing-logo:hover {
+            transform: scale(1.03);
+        }
+
+        .hero-title {
             font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
+            font-weight: 800;
             color: #fff;
-        }
-
-        .hub-header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            max-width: 600px;
-            margin: 0 auto;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1rem;
+        .hero-subtitle {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-bottom: 1.5rem;
         }
 
+        .hero-desc {
+            max-width: 720px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* Section generic styles */
         .section-label {
             font-size: 0.65rem;
             font-weight: 700;
-            color: var(--text-dim);
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            margin: 0.5rem 0 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .section-label::after {
@@ -71,118 +99,321 @@
             background: var(--border);
         }
 
-        .icon-box {
-            width: 40px;
-            height: 40px;
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        /* Feature grid - What VehicleX does */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            padding: 2rem;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-hover);
+        }
+
+        .feature-icon-box {
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid var(--border-bright);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--accent);
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .feature-card p {
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Steps grid - How it works */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .step-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .step-card:hover {
+            border-color: var(--border-bright);
             background: var(--bg-hover);
+        }
+
+        .step-num {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+        }
+
+        .step-card h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .step-card p {
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Sign In / Portals grid */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .portal-card {
+            background: var(--bg-panel);
+            padding: 2.25rem;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .portal-card:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+            border-color: var(--text-muted);
+        }
+
+        .portal-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-bright);
+            background: rgba(255, 255, 255, 0.01);
+            transition: var(--transition);
+        }
+
+        .portal-card:hover .portal-icon {
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .portal-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .portal-card p {
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Active session bar */
+        .active-session-bar {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-bright);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .active-session-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .active-session-info i {
+            color: var(--success);
+        }
+
+        .active-session-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .active-session-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .footer-credit {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
         }
     </style>
 </head>
 
 <body>
-    <div class="hub-container">
-        <div class="hub-header">
-            <div class="logo">
-                <img src="assets/logo.png" alt="VehicleX Logo" style="height: 180px;">
-            </div>
+    <div class="landing-container">
+        <!-- Hero section -->
+        <header class="landing-header">
+            <img src="assets/logo.png" alt="VehicleX Logo" class="landing-logo">
+            <h1 class="hero-title">VehicleX</h1>
+            <div class="hero-subtitle">Enterprise Parts & Workshop Management</div>
+            <p class="hero-desc">
+                An elegant, high-performance operations platform built to orchestrate and optimize wholesale automotive
+                parts distribution, real-time inventory management, and modern workshop service workflows with
+                intelligent portal integration.
+            </p>
+        </header>
 
-        </div>
-
-        <div class="section-label">Inventory Systems</div>
-        <div class="modules-grid">
-            <a href="html/dashboard.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="layout-dashboard" style="color: var(--accent);"></i>
+        <!-- Dynamic active session widget -->
+        <div id="active-session-container" style="display: none;">
+            <div class="active-session-bar">
+                <div class="active-session-info">
+                    <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+                    <span class="active-session-text" id="active-session-message">Logged in session active.</span>
                 </div>
-                <h3>Dashboard</h3>
-                <p>Real-time analytics, inventory valuation, and recent system activity.</p>
-            </a>
-
-            <a href="html/vendors.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="users" style="color: var(--success);"></i>
+                <div class="active-session-actions">
+                    <button class="btn btn-primary" id="btn-session-dash">Go To Dashboard</button>
+                    <button class="btn btn-secondary" onclick="logoutAll()">Log Out</button>
                 </div>
-                <h3>Vendors</h3>
-                <p>Global vendor directory. Manage partner profiles and contact details.</p>
-            </a>
-
-            <a href="html/parts.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="package" style="color: var(--warning);"></i>
-                </div>
-                <h3>Parts Catalog</h3>
-                <p>Master SKU registry. Track stock levels, pricing, and technical specs.</p>
-            </a>
-
-            <a href="html/purchases.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="shopping-cart" style="color: var(--error);"></i>
-                </div>
-                <h3>Purchases</h3>
-                <p>Inbound logistics. Generate invoices and automate stock replenishment.</p>
-            </a>
-
-            <a href="html/sales.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="receipt" style="color: var(--success);"></i>
-                </div>
-                <h3>Parts Sales</h3>
-                <p>Create customer sales invoices, apply loyalty discounts, and track live totals.</p>
-            </a>
-
-            <a href="html/customers.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="user" style="color: var(--warning);"></i>
-                </div>
-                <h3>Customers</h3>
-                <p>Search customer records and inspect vehicle, purchase, and transaction history.</p>
-            </a>
-
-            <a href="html/customer-services.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="calendar-check" style="color: var(--accent);"></i>
-                </div>
-                <h3>Customer Services</h3>
-                <p>Book service appointments, request unavailable parts, and review service history.</p>
-            </a>
-        </div>
-
-        <div class="section-label">Operations</div>
-        <div class="modules-grid" style="margin-bottom: 2rem;">
-            <a href="html/staff.html" class="hub-card">
-                <div class="icon-box"><i data-lucide="user-check"></i></div>
-                <h3>Staff</h3>
-                <p>Internal access management and role-based permissions.</p>
-            </a>
-            <div class="hub-card" style="opacity: 0.3; cursor: not-allowed;">
-                <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
-                <h3>Financials</h3>
-                <p>Profit/loss reporting and overhead distribution analysis.</p>
             </div>
         </div>
 
-        <div class="section-label">Customer Portal</div>
-        <div class="modules-grid">
-            <a href="html/login.html" class="hub-card" id="hub-customer-login">
-                <div class="icon-box">
-                    <i data-lucide="log-in" style="color: var(--accent);"></i>
-                </div>
-                <h3>Customer Login</h3>
-                <p>Access your customer profile, view details, and manage your registered vehicles.</p>
-            </a>
+        <!-- Section: Portals -->
+        <section id="portals-section">
+            <div class="section-label">Portals</div>
+            <h2 class="section-title">Sign In</h2>
+            <div class="portal-grid">
+                <a href="html/login.html?type=staff" class="portal-card">
+                    <div class="portal-icon" style="color: var(--accent);"><i data-lucide="shield"></i></div>
+                    <h3>Staff & Admin Login</h3>
+                    <p>Secure access for internal staff to manage stock, execute transactions, and process service
+                        bookings.</p>
+                </a>
+                <a href="html/login.html?type=customer" class="portal-card">
+                    <div class="portal-icon" style="color: var(--success);"><i data-lucide="log-in"></i></div>
+                    <h3>Customer Login</h3>
+                    <p>Access your customer portal to view service histories, vehicle checkups, and request parts
+                        sourcing.</p>
+                </a>
+                <a href="html/register.html" class="portal-card">
+                    <div class="portal-icon" style="color: var(--warning);"><i data-lucide="user-plus"></i></div>
+                    <h3>Customer Registration</h3>
+                    <p>Create a new customer account to join our directory and unlock workshop booking facilities.</p>
+                </a>
+            </div>
+        </section>
 
-            <a href="html/register.html" class="hub-card">
-                <div class="icon-box">
-                    <i data-lucide="user-plus" style="color: var(--success);"></i>
+        <!-- Section: What VehicleX Does -->
+        <section>
+            <div class="section-label">Capabilities</div>
+            <h2 class="section-title">What VehicleX Does</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-box" style="color: var(--accent);"><i data-lucide="package"></i></div>
+                    <h3>Precision Stock Catalog</h3>
+                    <p>Track automotive parts, cross-references, wholesale purchases, and stock levels in real-time.
+                        Instantly identify low-stock parts using automated alerts.</p>
                 </div>
-                <h3>Self Registration</h3>
-                <p>Register as a new customer with your details and your vehicle information.</p>
-            </a>
-        </div>
+                <div class="feature-card">
+                    <div class="feature-icon-box" style="color: var(--success);"><i data-lucide="receipt"></i></div>
+                    <h3>Unified Sales & Procurement</h3>
+                    <p>Orchestrate client sales invoices, dynamic loyalty tiers, credit billing, and vendor receipts
+                        seamlessly while maintaining full atomic record consistency.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-box" style="color: var(--warning);"><i data-lucide="calendar-check"></i>
+                    </div>
+                    <h3>Service Center Hub</h3>
+                    <p>Coordinate incoming service checkups, schedule appointments, handle vehicle snapshots, log
+                        customer requests, and manage direct service feedback.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: How It Works -->
+        <section>
+            <div class="section-label">Operations</div>
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <h3>Add Vehicle Snapshots</h3>
+                    <p>Customers register their accounts and record their auto profiles, creating a persistent digital
+                        service record for future workshop maintenance.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <h3>Manage Stock Levels</h3>
+                    <p>Inventory administrators optimize available parts, monitor sourcing pipelines, and trigger
+                        purchase invoices with integrated wholesalers.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <h3>Process Sales & Services</h3>
+                    <p>Internal staff book checkups, issue part sales, log reviews, and track credit liabilities within
+                        a single boxy elegant workspace.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-credit">
+            VehicleX Operations Management System &copy; 2026. All rights reserved.
+        </footer>
     </div>
 
     <div id="toast-container"></div>
@@ -190,18 +421,45 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            ui.refreshIcons();
+        function logoutAll() {
+            api.staff.logout();
+            api.customers.logout();
+            window.location.reload();
+        }
 
-            // Dynamic check for Customer Portal link
-            if (localStorage.getItem('customerToken')) {
-                const loginCard = document.getElementById('hub-customer-login');
-                if (loginCard) {
-                    loginCard.href = 'html/customer-profile.html';
-                    loginCard.querySelector('h3').textContent = 'My Profile';
-                    loginCard.querySelector('p').textContent = 'Manage your customer profile and view/edit your registered vehicles.';
-                }
+        function checkActiveSession() {
+            const staff = api.staff.getLoggedInUser();
+            const customerToken = localStorage.getItem('customerToken');
+            const msgEl = document.getElementById('active-session-message');
+            const btnEl = document.getElementById('btn-session-dash');
+            const container = document.getElementById('active-session-container');
+            const portalsSection = document.getElementById('portals-section');
+
+            if (staff) {
+                container.style.display = 'block';
+                portalsSection.style.display = 'none';
+                msgEl.textContent = `Active Session: Logged in as ${staff.name} (${staff.role})`;
+
+                btnEl.onclick = () => {
+                    window.location.href = staff.role === 'Admin' ? 'html/admin-dashboard.html' : 'html/staff-dashboard.html';
+                };
+            } else if (customerToken) {
+                container.style.display = 'block';
+                portalsSection.style.display = 'none';
+                msgEl.textContent = `Active Session: Logged in as Customer`;
+
+                btnEl.onclick = () => {
+                    window.location.href = 'html/customer-dashboard.html';
+                };
+            } else {
+                container.style.display = 'none';
+                portalsSection.style.display = 'block';
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkActiveSession();
+            ui.refreshIcons();
         });
     </script>
 </body>

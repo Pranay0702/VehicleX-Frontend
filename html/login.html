@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Login | VehicleX</title>
+    <title>Login | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         body {
@@ -28,6 +28,31 @@
             text-align: center;
             margin-bottom: 2rem;
         }
+
+        .role-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .role-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .role-tab.active {
+            color: var(--text-bright);
+            border-bottom: 2px solid var(--accent);
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -35,9 +60,17 @@
     <div class="login-container">
         <div class="login-header">
             <img src="../assets/logo.png" alt="Logo" style="height: 120px; margin-bottom: 1rem;">
-            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Customer Portal</div>
+            <div id="login-subtitle"
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                Customer Portal</div>
             <h2>Sign In</h2>
         </div>
+
+        <div class="role-tabs">
+            <div class="role-tab active" data-type="customer">Customer</div>
+            <div class="role-tab" data-type="staff">Staff & Admin</div>
+        </div>
+
         <form id="login-form">
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label>Email Address</label>
@@ -51,11 +84,14 @@
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     Log In
                 </button>
-                <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-                    Don't have an account? <a href="register.html" style="color: var(--accent); text-decoration: none;">Register here</a>
+                <div id="register-link-container"
+                    style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                    Don't have an account? <a href="register.html"
+                        style="color: var(--accent); text-decoration: none;">Register here</a>
                 </div>
                 <div style="text-align: center; font-size: 0.8rem; margin-top: 1rem;">
-                    <a href="../index.html" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <a href="../index.html"
+                        style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                         <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to Hub
                     </a>
                 </div>
@@ -68,14 +104,66 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../js/api.js"></script>
     <script>
+        let currentLoginType = 'customer'; // Default
+
         document.addEventListener('DOMContentLoaded', () => {
             ui.refreshIcons();
 
-            // If already logged in, redirect to profile
-            if (localStorage.getItem('customerToken')) {
-                window.location.href = 'customer-profile.html';
+            // Check URL for type parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            if (typeParam === 'staff') {
+                switchTab('staff');
+            } else {
+                // If already logged in, redirect
+                if (localStorage.getItem('customerToken')) {
+                    window.location.href = 'customer-profile.html';
+                }
             }
+
+            // Tab click listeners
+            document.querySelectorAll('.role-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.type);
+                });
+            });
         });
+
+        function switchTab(type) {
+            currentLoginType = type;
+
+            // Update tabs UI
+            document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.role-tab[data-type="${type}"]`).classList.add('active');
+
+            // Update form UI based on type
+            const subtitle = document.getElementById('login-subtitle');
+            const emailInput = document.getElementById('email');
+            const registerContainer = document.getElementById('register-link-container');
+
+            if (type === 'staff') {
+                subtitle.textContent = 'Staff & Admin Operations';
+                subtitle.style.color = 'var(--accent)';
+                emailInput.placeholder = 'admin@vehiclex.com';
+                registerContainer.style.display = 'none';
+
+                // Check if already logged in as staff
+                if (localStorage.getItem('staffToken')) {
+                    const user = api.staff.getLoggedInUser();
+                    window.location.href = user?.role === 'Admin' ? 'admin-dashboard.html' : 'staff-dashboard.html';
+                }
+            } else {
+                subtitle.textContent = 'Customer Portal';
+                subtitle.style.color = 'var(--text-muted)';
+                emailInput.placeholder = 'john@example.com';
+                registerContainer.style.display = 'block';
+
+                // Check if already logged in as customer
+                if (localStorage.getItem('customerToken')) {
+                    window.location.href = 'customer-dashboard.html';
+                }
+            }
+        }
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -85,9 +173,14 @@
             };
 
             try {
-                const response = await api.customers.login(data);
+                let response;
+                if (currentLoginType === 'staff') {
+                    response = await api.staff.login(data);
+                } else {
+                    response = await api.customers.login(data);
+                }
 
-                // Extract token safely (handling nested response.data or direct return)
+                // Extract token safely
                 let token = '';
                 if (response.data && response.data.token) {
                     token = response.data.token;
@@ -103,12 +196,19 @@
                     throw new Error('Authentication succeeded but no token was returned.');
                 }
 
-                localStorage.setItem('customerToken', token);
-                ui.showToast('Login successful! Redirecting...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'customer-profile.html';
-                }, 1000);
+                if (currentLoginType === 'staff') {
+                    localStorage.removeItem('customerToken');
+                    localStorage.setItem('staffToken', token);
+                    ui.showToast('Staff Login successful! Redirecting...', 'success');
+                    const user = api.staff.getLoggedInUser();
+                    const target = user?.role === 'Admin' ? 'admin-dashboard.html' : 'staff-dashboard.html';
+                    setTimeout(() => window.location.href = target, 1000);
+                } else {
+                    localStorage.removeItem('staffToken');
+                    localStorage.setItem('customerToken', token);
+                    ui.showToast('Customer Login successful! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'customer-dashboard.html', 1000);
+                }
             } catch (err) {
                 const msg = err.errors?.length ? err.errors[0] : err.message;
                 ui.showToast(msg || 'Invalid email or password.', 'error');

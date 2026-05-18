@@ -19,10 +19,11 @@
             <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
             <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
             <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
-            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Restock</a></li>
             <li><a href="sales.html"><i data-lucide="receipt"></i> Sales</a></li>
             <li><a href="customers.html"><i data-lucide="user"></i> Customers</a></li>
-            <li><a href="customer-services.html" class="active"><i data-lucide="calendar-check"></i> Customer Services</a></li>
+            <li><a href="customer-services.html" class="active"><i data-lucide="calendar-check"></i> Customer
+                    Services</a></li>
             <li><a href="staff.html"><i data-lucide="user-cog"></i> Staff</a></li>
         </ul>
         <div class="sidebar-footer">
@@ -56,49 +57,59 @@
         </div>
 
         <div class="toolbar">
-            <div class="form-group">
+            <div class="form-group" id="customer-select-group">
                 <label>Customer Account</label>
                 <select id="customer-id" onchange="syncWorkspace()">
                     <option value="">-- Select Customer --</option>
                 </select>
             </div>
             <div style="display: flex; gap: 1px; background: var(--border-bright);">
-                <button class="btn btn-primary" onclick="showAppointmentModal()">
+                <button id="btn-book-appointment" class="btn btn-primary" onclick="showAppointmentModal()">
                     <i data-lucide="calendar-plus" style="width: 14px;"></i> Book Appointment
-                </button>
-                <button class="btn btn-secondary" onclick="showPartRequestModal()">
-                    <i data-lucide="package-search" style="width: 14px;"></i> Request Part
-                </button>
-                <button class="btn btn-secondary" onclick="showReviewModal()">
-                    <i data-lucide="star" style="width: 14px;"></i> Review Service
                 </button>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" id="card-appointments">
                 <div class="stat-label">Appointments</div>
                 <div id="stat-appointments" class="stat-value">--</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Part Requests</div>
+            <div class="stat-card" id="card-requests" style="display: none;">
+                <div class="stat-label">Total Requests</div>
                 <div id="stat-requests" class="stat-value">--</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="card-req-pending" style="display: none;">
+                <div class="stat-label">Pending</div>
+                <div id="stat-req-pending" class="stat-value" style="color: var(--warning);">--</div>
+            </div>
+            <div class="stat-card" id="card-req-sourcing" style="display: none;">
+                <div class="stat-label">Sourcing</div>
+                <div id="stat-req-sourcing" class="stat-value" style="color: var(--accent);">--</div>
+            </div>
+            <div class="stat-card" id="card-req-available" style="display: none;">
+                <div class="stat-label">Available / Closed</div>
+                <div id="stat-req-available" class="stat-value" style="color: var(--success);">--</div>
+            </div>
+            <div class="stat-card" id="card-reviews">
                 <div class="stat-label">Reviews</div>
                 <div id="stat-reviews" class="stat-value">--</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="card-history">
                 <div class="stat-label">Purchases</div>
                 <div id="stat-history" class="stat-value">--</div>
             </div>
         </div>
 
-        <div class="subnav">
-            <button class="btn btn-secondary active" onclick="showPanel('appointments-panel', this)">Appointments</button>
-            <button class="btn btn-secondary" onclick="showPanel('requests-panel', this)">Part Requests</button>
-            <button class="btn btn-secondary" onclick="showPanel('reviews-panel', this)">Reviews</button>
-            <button class="btn btn-secondary" onclick="showPanel('history-panel', this)">History</button>
+        <div class="subnav" id="subnav-container">
+            <button class="btn btn-secondary active" id="tab-appointments"
+                onclick="showPanel('appointments-panel', this)">Appointments</button>
+            <button class="btn btn-secondary" id="tab-requests" style="display: none;"
+                onclick="showPanel('requests-panel', this)">Part Requests</button>
+            <button class="btn btn-secondary" id="tab-reviews"
+                onclick="showPanel('reviews-panel', this)">Reviews</button>
+            <button class="btn btn-secondary" id="tab-history"
+                onclick="showPanel('history-panel', this)">History</button>
         </div>
 
         <section id="appointments-panel" class="tab-panel active">
@@ -123,7 +134,8 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Part</th>
+                            <th>Customer</th>
+                            <th>Part Name</th>
                             <th>Part Number</th>
                             <th>Vehicle</th>
                             <th>Qty</th>
@@ -219,12 +231,14 @@
                     </div>
                     <div class="form-group span-2">
                         <label>Service Notes</label>
-                        <textarea id="appointment-notes" style="min-height: 80px;" placeholder="Customer issue, preferred time, or extra details..."></textarea>
+                        <textarea id="appointment-notes" style="min-height: 80px;"
+                            placeholder="Customer issue, preferred time, or extra details..."></textarea>
                     </div>
                 </div>
                 <div style="display: flex; gap: 1px; background: var(--border-bright);">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Commit Booking</button>
-                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('appointment-modal')">Discard</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="ui.hideModal('appointment-modal')">Discard</button>
                 </div>
             </form>
         </div>
@@ -263,212 +277,282 @@
                 </div>
                 <div style="display: flex; gap: 1px; background: var(--border-bright);">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Submit Request</button>
-                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('part-request-modal')">Discard</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="ui.hideModal('part-request-modal')">Discard</button>
                 </div>
             </form>
         </div>
-    </div>
+        <div id="toast-container"></div>
 
-    <div id="review-modal" class="modal-overlay"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
-        <div class="modal">
-            <h2>Service Review</h2>
-            <form id="review-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Appointment</label>
-                        <select id="review-appointment">
-                            <option value="">General Review</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Rating</label>
-                        <select id="review-rating" required>
-                            <option value="Five">Five</option>
-                            <option value="Four">Four</option>
-                            <option value="Three">Three</option>
-                            <option value="Two">Two</option>
-                            <option value="One">One</option>
-                        </select>
-                    </div>
-                    <div class="form-group span-2">
-                        <label>Comment</label>
-                        <textarea id="review-comment" required minlength="3" style="min-height: 100px;" placeholder="Service quality, staff response, and result..."></textarea>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1px; background: var(--border-bright);">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Publish Review</button>
-                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('review-modal')">Discard</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="../js/api.js"></script>
+        <script>
+            let appointments = [];
+            let isAdmin = false;
 
-    <div id="toast-container"></div>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="../js/api.js"></script>
-    <script>
-        let appointments = [];
-
-        function selectedCustomerId() {
-            return parseInt(document.getElementById('customer-id').value);
-        }
-
-        function requireCustomer() {
-            if (selectedCustomerId()) return true;
-            ui.showToast('Select a customer account first.', 'error');
-            return false;
-        }
-
-        function showPanel(panelId, button) {
-            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-            document.querySelectorAll('.subnav button').forEach(item => item.classList.remove('active'));
-            document.getElementById(panelId).classList.add('active');
-            button.classList.add('active');
-        }
-
-        function statusBadge(text) {
-            const value = text || 'Pending';
-            const lower = value.toLowerCase();
-            const type = lower.includes('complete') || lower.includes('available') ? 'success' : lower.includes('cancel') ? 'error' : 'warning';
-            return `<span class="status-pill ${type}">${value}</span>`;
-        }
-
-        function emptyRow(colspan, text) {
-            return `<tr><td colspan="${colspan}" class="muted-empty">${text}</td></tr>`;
-        }
-
-        function formatDate(value) {
-            if (!value) return '--';
-            return new Date(value).toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        }
-
-        function money(value) {
-            return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-        }
-
-        function vehicleText(item) {
-            return [item.vehicleMake, item.vehicleModel, item.vehicleRegistrationNumber].filter(Boolean).join(' ') || '--';
-        }
-
-        async function loadCustomers() {
-            try {
-                const response = await api.customers.getAll();
-                const customers = response.data || [];
-                const select = document.getElementById('customer-id');
-                select.innerHTML = '<option value="">-- Select Customer --</option>';
-                customers.forEach(customer => {
-                    const option = document.createElement('option');
-                    option.value = customer.id;
-                    option.textContent = `${customer.fullName} | ${customer.email}`;
-                    select.appendChild(option);
-                });
-            } catch (err) {
-                ui.showToast(err.message || 'Customer sync failed.', 'error');
-            }
-        }
-
-        async function syncWorkspace() {
-            const customerId = selectedCustomerId();
-            if (!customerId) {
-                renderAppointments([]);
-                renderRequests([]);
-                renderReviews([]);
-                renderHistory({ purchaseHistory: [], serviceHistory: [] });
-                setStats(0, 0, 0, 0);
-                return;
+            function selectedCustomerId() {
+                return parseInt(document.getElementById('customer-id').value);
             }
 
-            try {
-                const [appointmentRes, requestRes, reviewRes, historyRes] = await Promise.all([
-                    api.appointments.getByCustomer(customerId),
-                    api.unavailablePartRequests.getByCustomer(customerId),
-                    api.serviceReviews.getByCustomer(customerId),
-                    api.customerHistory.getAll(customerId)
-                ]);
-
-                appointments = appointmentRes.data || [];
-                const requests = requestRes.data || [];
-                const reviews = reviewRes.data || [];
-                const history = historyRes.data || { purchaseHistory: [], serviceHistory: [] };
-
-                renderAppointments(appointments);
-                renderRequests(requests);
-                renderReviews(reviews);
-                renderHistory(history);
-                populateReviewAppointments();
-                setStats(appointments.length, requests.length, reviews.length, (history.purchaseHistory || []).length);
-            } catch (err) {
-                ui.showToast(err.message || 'Workspace sync failed.', 'error');
+            function requireCustomer() {
+                if (selectedCustomerId()) return true;
+                ui.showToast('Select a customer account first.', 'error');
+                return false;
             }
-        }
 
-        function setStats(appointmentCount, requestCount, reviewCount, purchaseCount) {
-            document.getElementById('stat-appointments').textContent = appointmentCount;
-            document.getElementById('stat-requests').textContent = requestCount;
-            document.getElementById('stat-reviews').textContent = reviewCount;
-            document.getElementById('stat-history').textContent = purchaseCount;
-        }
+            function showPanel(panelId, button) {
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                document.querySelectorAll('.subnav button').forEach(item => item.classList.remove('active'));
+                document.getElementById(panelId).classList.add('active');
+                button.classList.add('active');
+            }
 
-        function renderAppointments(items) {
-            const tbody = document.getElementById('appointments-body');
-            tbody.innerHTML = items.length ? '' : emptyRow(5, 'No appointments logged');
-            items.forEach(item => {
-                tbody.insertAdjacentHTML('beforeend', `
+            function statusBadge(text) {
+                const value = text || 'Pending';
+                const lower = value.toLowerCase();
+                const type = lower.includes('complete') || lower.includes('available') ? 'success' : lower.includes('cancel') || lower.includes('closed') ? 'error' : 'warning';
+                return `<span class="status-pill ${type}">${value}</span>`;
+            }
+
+            function emptyRow(colspan, text) {
+                return `<tr><td colspan="${colspan}" class="muted-empty">${text}</td></tr>`;
+            }
+
+            function formatDate(value) {
+                if (!value) return '--';
+                return new Date(value).toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            }
+
+            function money(value) {
+                return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+            }
+
+            function vehicleText(item) {
+                return [item.vehicleMake, item.vehicleModel, item.vehicleRegistrationNumber].filter(Boolean).join(' ') || '--';
+            }
+
+            async function loadCustomers() {
+                try {
+                    const response = await api.customers.getAll();
+                    const customers = response.data || [];
+                    const select = document.getElementById('customer-id');
+                    select.innerHTML = '<option value="">-- Select Customer --</option>';
+                    customers.forEach(customer => {
+                        const option = document.createElement('option');
+                        option.value = customer.id;
+                        option.textContent = `${customer.fullName} | ${customer.email}`;
+                        select.appendChild(option);
+                    });
+                } catch (err) {
+                    ui.showToast(err.message || 'Customer sync failed.', 'error');
+                }
+            }
+
+            async function syncWorkspace() {
+                const customerId = selectedCustomerId();
+                try {
+                    let appointmentRes = { data: [] };
+                    let reviewRes = { data: [] };
+                    let historyRes = { data: { purchaseHistory: [], serviceHistory: [] } };
+                    let requestRes = { data: [] };
+
+                    if (isAdmin) {
+                        // Admin ONLY handles Unavailable Part Requests - always show all requests
+                        requestRes = await api.unavailablePartRequests.getAll();
+                    } else {
+                        // Regular Staff handles Appointments and Reviews
+                        if (!customerId) {
+                            [appointmentRes, reviewRes] = await Promise.all([
+                                api.appointments.getAll(),
+                                api.serviceReviews.getAll()
+                            ]);
+                        } else {
+                            [appointmentRes, reviewRes, historyRes] = await Promise.all([
+                                api.appointments.getByCustomer(customerId),
+                                api.serviceReviews.getByCustomer(customerId),
+                                api.customerHistory.getAll(customerId)
+                            ]);
+                        }
+                    }
+
+                    appointments = appointmentRes.data || [];
+                    const requests = requestRes.data || [];
+                    const reviews = reviewRes.data || [];
+                    const history = historyRes.data || { purchaseHistory: [], serviceHistory: [] };
+
+                    renderAppointments(appointments);
+                    renderRequests(requests);
+                    renderReviews(reviews);
+                    renderHistory(history);
+                    setStats(appointments.length, requests.length, reviews.length, (history.purchaseHistory || []).length);
+
+                    if (isAdmin) {
+                        document.getElementById('stat-req-pending').textContent = requests.filter(r => (r.statusName || r.status) === 'Pending').length;
+                        document.getElementById('stat-req-sourcing').textContent = requests.filter(r => (r.statusName || r.status) === 'Sourcing').length;
+                        document.getElementById('stat-req-available').textContent = requests.filter(r => {
+                            const s = r.statusName || r.status;
+                            return s === 'Available' || s === 'Closed';
+                        }).length;
+                    }
+                } catch (err) {
+                    ui.showToast(err.message || 'Workspace sync failed.', 'error');
+                }
+            }
+
+            function setStats(appointmentCount, requestCount, reviewCount, purchaseCount) {
+                document.getElementById('stat-appointments').textContent = appointmentCount;
+                document.getElementById('stat-requests').textContent = requestCount;
+                document.getElementById('stat-reviews').textContent = reviewCount;
+                document.getElementById('stat-history').textContent = purchaseCount;
+            }
+
+            function renderAppointments(items) {
+                const tbody = document.getElementById('appointments-body');
+                tbody.innerHTML = items.length ? '' : emptyRow(5, 'No appointments logged');
+                items.forEach(item => {
+                    tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td><span style="font-weight: 600; color: #fff;">${item.serviceType}</span></td>
                         <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(item.appointmentDateUtc)}</td>
                         <td>${vehicleText(item)}</td>
-                        <td>${statusBadge(item.statusName || item.status)}</td>
+                        <td>${createStatusDropdown('appointment', item.id, item.statusName || item.status)}</td>
                         <td style="color: var(--text-dim); font-size: 0.8rem;">${item.notes || '--'}</td>
                     </tr>
                 `);
-            });
-        }
+                });
+            }
 
-        function renderRequests(items) {
-            const tbody = document.getElementById('requests-body');
-            tbody.innerHTML = items.length ? '' : emptyRow(6, 'No unavailable part requests logged');
-            items.forEach(item => {
-                tbody.insertAdjacentHTML('beforeend', `
+            function createStatusDropdown(type, id, currentStatus) {
+                const appointmentOptions = [
+                    { value: 1, label: 'Pending' },
+                    { value: 2, label: 'Confirmed' },
+                    { value: 3, label: 'Completed' },
+                    { value: 4, label: 'Cancelled' }
+                ];
+
+                const options = appointmentOptions;
+                const onchangeCall = `updateAppointmentStatus(${id}, this.value)`;
+
+                // Normalize current status string to integer value for comparison
+                let currentVal = 1;
+                const s = String(currentStatus).toUpperCase();
+                if (s === 'CONFIRMED' || s === '2') currentVal = 2;
+                if (s === 'COMPLETED' || s === '3') currentVal = 3;
+                if (s === 'CANCELLED' || s === '4') currentVal = 4;
+
+                let html = `<select class="input-field" style="padding: 4px; font-size: 0.75rem; height: auto;" onchange="${onchangeCall}">`;
+                options.forEach(opt => {
+                    const selected = opt.value === currentVal ? 'selected' : '';
+                    html += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
+                });
+                html += `</select>`;
+                return html;
+            }
+
+            async function updateAppointmentStatus(id, newStatus) {
+                try {
+                    await api.appointments.updateStatus(id, parseInt(newStatus));
+                    ui.showToast('Appointment status updated.');
+                    syncWorkspace();
+                } catch (err) {
+                    ui.showToast(err.message || 'Failed to update status', 'error');
+                    syncWorkspace();
+                }
+            }
+
+            function createPartRequestStatusDropdown(id, currentStatus) {
+                const options = [
+                    { value: 1, label: 'Pending' },
+                    { value: 2, label: 'Sourcing' },
+                    { value: 3, label: 'Available' },
+                    { value: 4, label: 'Closed' }
+                ];
+
+                let currentVal = 1;
+                const s = String(currentStatus).toUpperCase();
+                if (s === 'SOURCING' || s === '2') currentVal = 2;
+                if (s === 'AVAILABLE' || s === '3') currentVal = 3;
+                if (s === 'CLOSED' || s === '4') currentVal = 4;
+
+                let html = `<select class="input-field" style="padding: 4px; font-size: 0.75rem; height: auto;" onchange="updatePartRequestStatus(${id}, this.value)">`;
+                options.forEach(opt => {
+                    const selected = opt.value === currentVal ? 'selected' : '';
+                    html += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
+                });
+                html += `</select>`;
+                return html;
+            }
+
+            async function updatePartRequestStatus(id, newStatus) {
+                try {
+                    await api.unavailablePartRequests.updateStatus(id, parseInt(newStatus));
+                    ui.showToast('Part request status updated.');
+                    syncWorkspace();
+                } catch (err) {
+                    ui.showToast(err.message || 'Failed to update status', 'error');
+                    syncWorkspace();
+                }
+            }
+
+            function renderRequests(items) {
+                const tbody = document.getElementById('requests-body');
+                tbody.innerHTML = items.length ? '' : emptyRow(7, 'No unavailable part requests logged');
+                items.forEach(item => {
+                    const statusHtml = isAdmin
+                        ? createPartRequestStatusDropdown(item.id, item.statusName || item.status)
+                        : statusBadge(item.statusName || item.status);
+
+                    tbody.insertAdjacentHTML('beforeend', `
                     <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.customerName || 'Unknown'}</span></td>
                         <td><span style="font-weight: 600; color: #fff;">${item.partName}</span></td>
                         <td class="mono" style="color: var(--text-muted);">${item.partNumber || '--'}</td>
                         <td>${[item.vehicleMake, item.vehicleModel].filter(Boolean).join(' ') || '--'}</td>
                         <td class="mono">${item.quantity}</td>
-                        <td>${statusBadge(item.statusName || item.status)}</td>
+                        <td>${statusHtml}</td>
                         <td style="color: var(--text-dim); font-size: 0.8rem;">${item.notes || '--'}</td>
                     </tr>
                 `);
-            });
-        }
+                });
+            }
 
-        function renderReviews(items) {
-            const tbody = document.getElementById('reviews-body');
-            tbody.innerHTML = items.length ? '' : emptyRow(4, 'No service reviews submitted');
-            items.forEach(item => {
-                tbody.insertAdjacentHTML('beforeend', `
+            function renderStars(rating) {
+                const map = { 'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1 };
+                const num = (typeof rating === 'string') ? (map[rating.toLowerCase()] || 5) : (rating || 5);
+                let html = '<div style="display: flex; gap: 2px;">';
+                for (let i = 0; i < num; i++) {
+                    html += '<i data-lucide="star" style="width: 14px; color: #ff9f43; fill: #ff9f43;"></i>';
+                }
+                html += '</div>';
+                return html;
+            }
+
+            function renderReviews(items) {
+                const tbody = document.getElementById('reviews-body');
+                tbody.innerHTML = items.length ? '' : emptyRow(4, 'No service reviews submitted');
+                items.forEach(item => {
+                    tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td style="color: var(--text-main);">${item.comment}</td>
                         <td class="mono" style="color: var(--text-muted);">${item.appointmentId || 'GENERAL'}</td>
-                        <td>${statusBadge(item.ratingName || item.rating)}</td>
+                        <td>${renderStars(item.ratingName || item.rating)}</td>
                         <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(item.createdAtUtc)}</td>
                     </tr>
                 `);
-            });
-        }
+                });
+                ui.refreshIcons();
+            }
 
-        function renderHistory(history) {
-            const purchases = history.purchaseHistory || [];
-            const services = history.serviceHistory || [];
-            const purchaseBody = document.getElementById('purchase-history-body');
-            const serviceBody = document.getElementById('service-history-body');
+            function renderHistory(history) {
+                const purchases = history.purchaseHistory || [];
+                const services = history.serviceHistory || [];
+                const purchaseBody = document.getElementById('purchase-history-body');
+                const serviceBody = document.getElementById('service-history-body');
 
-            purchaseBody.innerHTML = purchases.length ? '' : emptyRow(5, 'No purchase history available');
-            purchases.forEach(item => {
-                const itemSummary = (item.items || []).map(line => `${line.partName} x${line.quantity}`).join(', ') || '--';
-                purchaseBody.insertAdjacentHTML('beforeend', `
+                purchaseBody.innerHTML = purchases.length ? '' : emptyRow(5, 'No purchase history available');
+                purchases.forEach(item => {
+                    const itemSummary = (item.items || []).map(line => `${line.partName} x${line.quantity}`).join(', ') || '--';
+                    purchaseBody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td class="mono" style="color: var(--accent); font-weight: 600;">${item.invoiceNumber}</td>
                         <td style="color: var(--text-muted);">${formatDate(item.purchaseDateUtc)}</td>
@@ -477,11 +561,11 @@
                         <td style="color: var(--text-dim); font-size: 0.8rem;">${itemSummary}</td>
                     </tr>
                 `);
-            });
+                });
 
-            serviceBody.innerHTML = services.length ? '' : emptyRow(5, 'No service history available');
-            services.forEach(item => {
-                serviceBody.insertAdjacentHTML('beforeend', `
+                serviceBody.innerHTML = services.length ? '' : emptyRow(5, 'No service history available');
+                services.forEach(item => {
+                    serviceBody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td><span style="font-weight: 600; color: #fff;">${item.serviceType}</span></td>
                         <td style="color: var(--text-muted);">${formatDate(item.appointmentDateUtc)}</td>
@@ -490,116 +574,131 @@
                         <td style="color: var(--text-dim); font-size: 0.8rem;">${item.review ? item.review.comment : '--'}</td>
                     </tr>
                 `);
+                });
+            }
+
+
+            function showAppointmentModal() {
+                if (!requireCustomer()) return;
+                ui.showModal('appointment-modal');
+            }
+
+            function showPartRequestModal() {
+                if (!requireCustomer()) return;
+                ui.showModal('part-request-modal');
+            }
+
+
+            document.getElementById('appointment-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!requireCustomer()) return;
+
+                const data = {
+                    customerId: selectedCustomerId(),
+                    appointmentDateUtc: new Date(document.getElementById('appointment-date').value).toISOString(),
+                    serviceType: document.getElementById('appointment-service').value,
+                    vehicleMake: document.getElementById('appointment-make').value || null,
+                    vehicleModel: document.getElementById('appointment-model').value || null,
+                    vehicleRegistrationNumber: document.getElementById('appointment-reg').value || null,
+                    notes: document.getElementById('appointment-notes').value || null
+                };
+
+                try {
+                    await api.appointments.book(data);
+                    ui.showToast('Appointment booked.');
+                    ui.hideModal('appointment-modal');
+                    syncWorkspace();
+                } catch (err) {
+                    ui.showToast(err.message || 'Booking failed.', 'error');
+                }
             });
-        }
 
-        function populateReviewAppointments() {
-            const select = document.getElementById('review-appointment');
-            select.innerHTML = '<option value="">General Review</option>';
-            appointments.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.id;
-                option.textContent = `#${item.id} | ${item.serviceType} | ${formatDate(item.appointmentDateUtc)}`;
-                select.appendChild(option);
+            document.getElementById('part-request-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!requireCustomer()) return;
+
+                const data = {
+                    customerId: selectedCustomerId(),
+                    partName: document.getElementById('request-part-name').value,
+                    partNumber: document.getElementById('request-part-number').value || null,
+                    vehicleMake: document.getElementById('request-make').value || null,
+                    vehicleModel: document.getElementById('request-model').value || null,
+                    quantity: parseInt(document.getElementById('request-quantity').value),
+                    notes: document.getElementById('request-notes').value || null
+                };
+
+                try {
+                    await api.unavailablePartRequests.create(data);
+                    ui.showToast('Part request submitted.');
+                    ui.hideModal('part-request-modal');
+                    syncWorkspace();
+                } catch (err) {
+                    ui.showToast(err.message || 'Request failed.', 'error');
+                }
             });
-        }
 
-        function showAppointmentModal() {
-            if (!requireCustomer()) return;
-            ui.showModal('appointment-modal');
-        }
 
-        function showPartRequestModal() {
-            if (!requireCustomer()) return;
-            ui.showModal('part-request-modal');
-        }
+            document.addEventListener('DOMContentLoaded', async () => {
+                if (!api.auth.requireStaff()) return;
+                ui.setupStaffSidebar('customer-services.html');
+                ui.refreshIcons();
 
-        function showReviewModal() {
-            if (!requireCustomer()) return;
-            populateReviewAppointments();
-            ui.showModal('review-modal');
-        }
+                const staff = api.staff.getLoggedInUser();
+                isAdmin = staff && staff.role === 'Admin';
 
-        document.getElementById('appointment-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!requireCustomer()) return;
+                // Show/hide UI sections based on Admin vs Staff role
+                if (isAdmin) {
+                    document.getElementById('customer-select-group').style.display = 'none';
 
-            const data = {
-                customerId: selectedCustomerId(),
-                appointmentDateUtc: new Date(document.getElementById('appointment-date').value).toISOString(),
-                serviceType: document.getElementById('appointment-service').value,
-                vehicleMake: document.getElementById('appointment-make').value || null,
-                vehicleModel: document.getElementById('appointment-model').value || null,
-                vehicleRegistrationNumber: document.getElementById('appointment-reg').value || null,
-                notes: document.getElementById('appointment-notes').value || null
-            };
+                    document.getElementById('btn-book-appointment').style.display = 'none';
 
-            try {
-                await api.appointments.book(data);
-                ui.showToast('Appointment booked.');
-                ui.hideModal('appointment-modal');
-                syncWorkspace();
-            } catch (err) {
-                ui.showToast(err.message || 'Booking failed.', 'error');
-            }
-        });
+                    document.getElementById('card-appointments').style.display = 'none';
+                    document.getElementById('card-reviews').style.display = 'none';
+                    document.getElementById('card-history').style.display = 'none';
+                    document.getElementById('card-requests').style.display = 'block';
+                    document.getElementById('card-req-pending').style.display = 'block';
+                    document.getElementById('card-req-sourcing').style.display = 'block';
+                    document.getElementById('card-req-available').style.display = 'block';
 
-        document.getElementById('part-request-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!requireCustomer()) return;
+                    document.getElementById('tab-appointments').style.display = 'none';
+                    document.getElementById('tab-reviews').style.display = 'none';
+                    document.getElementById('tab-history').style.display = 'none';
+                    document.getElementById('tab-requests').style.display = 'block';
 
-            const data = {
-                customerId: selectedCustomerId(),
-                partName: document.getElementById('request-part-name').value,
-                partNumber: document.getElementById('request-part-number').value || null,
-                vehicleMake: document.getElementById('request-make').value || null,
-                vehicleModel: document.getElementById('request-model').value || null,
-                quantity: parseInt(document.getElementById('request-quantity').value),
-                notes: document.getElementById('request-notes').value || null
-            };
+                    showPanel('requests-panel', document.getElementById('tab-requests'));
+                } else {
+                    document.getElementById('customer-select-group').style.display = 'block';
 
-            try {
-                await api.unavailablePartRequests.create(data);
-                ui.showToast('Part request submitted.');
-                ui.hideModal('part-request-modal');
-                syncWorkspace();
-            } catch (err) {
-                ui.showToast(err.message || 'Request failed.', 'error');
-            }
-        });
+                    document.getElementById('btn-book-appointment').style.display = 'block';
 
-        document.getElementById('review-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!requireCustomer()) return;
+                    document.getElementById('card-appointments').style.display = 'block';
+                    document.getElementById('card-reviews').style.display = 'block';
+                    document.getElementById('card-history').style.display = 'block';
+                    document.getElementById('card-requests').style.display = 'none';
+                    document.getElementById('card-req-pending').style.display = 'none';
+                    document.getElementById('card-req-sourcing').style.display = 'none';
+                    document.getElementById('card-req-available').style.display = 'none';
 
-            const appointmentId = document.getElementById('review-appointment').value;
-            const data = {
-                customerId: selectedCustomerId(),
-                appointmentId: appointmentId ? parseInt(appointmentId) : null,
-                rating: document.getElementById('review-rating').value,
-                comment: document.getElementById('review-comment').value
-            };
+                    document.getElementById('tab-appointments').style.display = 'block';
+                    document.getElementById('tab-reviews').style.display = 'block';
+                    document.getElementById('tab-history').style.display = 'block';
+                    document.getElementById('tab-requests').style.display = 'none';
 
-            try {
-                await api.serviceReviews.create(data);
-                ui.showToast('Review published.');
-                ui.hideModal('review-modal');
-                syncWorkspace();
-            } catch (err) {
-                ui.showToast(err.message || 'Review failed.', 'error');
-            }
-        });
+                    showPanel('appointments-panel', document.getElementById('tab-appointments'));
+                }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            ui.refreshIcons();
-            await loadCustomers();
-            setStats(0, 0, 0, 0);
-            renderAppointments([]);
-            renderRequests([]);
-            renderReviews([]);
-            renderHistory({ purchaseHistory: [], serviceHistory: [] });
-        });
-    </script>
+                if (isAdmin) {
+                    await syncWorkspace();
+                } else {
+                    await loadCustomers();
+                    setStats(0, 0, 0, 0);
+                    renderAppointments([]);
+                    renderRequests([]);
+                    renderReviews([]);
+                    renderHistory({ purchaseHistory: [], serviceHistory: [] });
+                }
+            });
+        </script>
 </body>
 
 </html>

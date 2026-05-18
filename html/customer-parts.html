@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Parts | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .workbench {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .catalog-panel {
+            flex: 2;
+        }
+
+        .cart-panel {
+            flex: 1;
+            max-width: 400px;
+            position: sticky;
+            top: 2rem;
+            align-self: flex-start;
+        }
+
+        .part-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .part-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .part-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .part-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .part-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .part-price {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .part-action {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .qty-input {
+            width: 70px;
+            padding: 8px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: #fff;
+            text-align: center;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        .totals-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .totals-row.grand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .cart-item-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .cart-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .cart-item-price {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-btn {
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .cart-btn:hover {
+            color: #ff6b6b;
+        }
+
+        .qty-btn {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            border-color: var(--accent);
+            background: var(--border);
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="customer-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="customer-profile.html"><i data-lucide="user"></i> My Portal</a></li>
+            <li><a href="customer-history.html"><i data-lucide="history"></i> My History</a></li>
+            <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
+            <li><a href="customer-parts.html" class="active"><i data-lucide="package"></i> Buy Parts</a></li>
+            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="avatar-initials"
+                        style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                        CU</div>
+                    <div>
+                        <div id="customer-display-name" style="font-size: 0.75rem; font-weight: 600; color: #fff;">
+                            Customer</div>
+                        <div style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                            Portal User</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="logoutCustomer()"
+                style="width: 100%; border-color: var(--error); color: var(--error); padding: 8px;">
+                <i data-lucide="log-out" style="width: 14px;"></i> Log Out
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Storefront</div>
+                    <h1>Parts Shop</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="workbench">
+            <!-- Left Panel: Parts Catalog -->
+            <section class="catalog-panel">
+                <input type="text" id="parts-search" class="search-bar" placeholder="Search parts by name or SKU..." oninput="filterParts()">
+                <div class="part-grid" id="parts-container">
+                    <!-- Dynamic Part Cards -->
+                </div>
+            </section>
+
+            <!-- Right Panel: Cart Summary -->
+            <section class="cart-panel card-elegant">
+                <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    Shopping Cart
+                </h2>
+                
+                <div class="cart-item-list" id="cart-items">
+                    <!-- Dynamic Cart Items -->
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">
+                        Cart is empty. Select parts to purchase.
+                    </div>
+                </div>
+
+                <div class="totals-card">
+                    <div class="totals-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Discount (10% over 5,000)</span>
+                        <span id="discount" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row">
+                        <span>Tax (13%)</span>
+                        <span id="tax" class="mono">NPR 0.00</span>
+                    </div>
+                    <div class="totals-row grand">
+                        <span>Grand Total</span>
+                        <span id="grand-total" class="mono">NPR 0.00</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="checkout-btn" style="width: 100%; margin-top: 1.5rem;" onclick="checkout()">
+                    <i data-lucide="shopping-bag" style="width: 16px;"></i> Place Order
+                </button>
+            </section>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let parts = [];
+        let cart = [];
+
+        function logoutCustomer() {
+            api.customers.logout();
+            window.location.href = 'login.html';
+        }
+
+        async function initPage() {
+            try {
+                // Fetch profile
+                const profileRes = await api.customers.getProfile();
+                const profile = profileRes.data || profileRes;
+                document.getElementById('customer-display-name').textContent = profile.fullName || 'Valued Customer';
+                const nameParts = (profile.fullName || '').split(' ');
+                const initials = nameParts.map(p => p[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+                document.getElementById('avatar-initials').textContent = initials;
+
+                // Load parts catalog
+                const partsRes = await api.parts.getAll();
+                parts = partsRes.data || partsRes || [];
+                renderCatalog(parts);
+            } catch (err) {
+                if (err.message && err.message.toLowerCase().includes('unauthorized')) {
+                    logoutCustomer();
+                } else {
+                    ui.showToast('Failed to initialize page.', 'error');
+                }
+            }
+        }
+
+        function renderCatalog(items) {
+            const container = document.getElementById('parts-container');
+            container.innerHTML = '';
+            
+            if (!items.length) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem 0;">No parts found.</div>';
+                return;
+            }
+
+            items.forEach(part => {
+                const stockText = part.stockQuantity > 0 ? `Stock: ${part.stockQuantity}` : 'Out of Stock';
+                const isOutOfStock = part.stockQuantity <= 0;
+                
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="part-card">
+                        <div>
+                            <div class="part-title">${part.name}</div>
+                            <div class="part-meta">
+                                <span class="mono" style="font-size: 0.7rem;">SKU: ${part.partNumber || '--'}</span>
+                                <span style="color: ${isOutOfStock ? 'var(--error)' : 'var(--accent)'}; font-weight: 600;">${stockText}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="part-price">NPR ${Number(part.unitPrice || part.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                            <div class="part-action">
+                                <input type="number" class="qty-input mono" id="qty-${part.id}" min="1" max="${part.stockQuantity}" value="1" ${isOutOfStock ? 'disabled' : ''}>
+                                <button class="btn btn-primary" style="flex: 1; padding: 8px 12px; font-size: 0.8rem;" onclick="addToCart(${part.id})" ${isOutOfStock ? 'disabled' : ''}>
+                                    <i data-lucide="shopping-cart" style="width: 14px;"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+            ui.refreshIcons();
+        }
+
+        function filterParts() {
+            const term = document.getElementById('parts-search').value.toLowerCase();
+            const filtered = parts.filter(p => 
+                p.name.toLowerCase().includes(term) || 
+                (p.partNumber || '').toLowerCase().includes(term)
+            );
+            renderCatalog(filtered);
+        }
+
+        function addToCart(partId) {
+            const part = parts.find(p => p.id === partId);
+            if (!part) return;
+
+            const qtyInput = document.getElementById(`qty-${partId}`);
+            const qty = parseInt(qtyInput.value) || 1;
+
+            if (qty > part.stockQuantity) {
+                ui.showToast('Selected quantity exceeds stock limits.', 'error');
+                return;
+            }
+
+            const existing = cart.find(item => item.partId === partId);
+            if (existing) {
+                if (existing.quantity + qty > part.stockQuantity) {
+                    ui.showToast('Selected total exceeds stock limits.', 'error');
+                    return;
+                }
+                existing.quantity += qty;
+            } else {
+                cart.push({
+                    partId: part.id,
+                    name: part.name,
+                    price: part.unitPrice || part.price,
+                    quantity: qty,
+                    maxStock: part.stockQuantity
+                });
+            }
+
+            qtyInput.value = 1; // Reset catalog qty input
+            renderCart();
+            ui.showToast(`${part.name} added to cart.`);
+        }
+
+        function removeFromCart(partId) {
+            cart = cart.filter(item => item.partId !== partId);
+            renderCart();
+        }
+
+        function changeCartQty(partId, delta) {
+            const item = cart.find(item => item.partId === partId);
+            if (!item) return;
+
+            const newQty = item.quantity + delta;
+            if (newQty <= 0) {
+                removeFromCart(partId);
+                return;
+            }
+
+            if (newQty > item.maxStock) {
+                ui.showToast('Selected quantity exceeds stock limits.', 'error');
+                return;
+            }
+
+            item.quantity = newQty;
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-items');
+            list.innerHTML = '';
+
+            if (!cart.length) {
+                list.innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">
+                        Cart is empty. Select parts to purchase.
+                    </div>
+                `;
+                updateTotals(0);
+                return;
+            }
+
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                const lineTotal = item.price * item.quantity;
+                subtotal += lineTotal;
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <span class="cart-item-name">${item.name}</span>
+                            <span class="cart-item-price">NPR ${Number(item.price).toLocaleString()}</span>
+                        </div>
+                        <div class="cart-item-actions" style="display: flex; align-items: center; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <button class="qty-btn" onclick="changeCartQty(${item.partId}, -1)">-</button>
+                                <span class="mono" style="font-weight: 600; min-width: 16px; text-align: center; color: #fff;">${item.quantity}</span>
+                                <button class="qty-btn" onclick="changeCartQty(${item.partId}, 1)">+</button>
+                            </div>
+                            <span class="mono" style="font-weight: 600; min-width: 80px; text-align: right;">NPR ${lineTotal.toLocaleString()}</span>
+                            <button class="cart-btn" onclick="removeFromCart(${item.partId})">
+                                <i data-lucide="trash-2" style="width: 14px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `);
+            });
+
+            updateTotals(subtotal);
+            ui.refreshIcons();
+        }
+
+        let currentGrandTotal = 0;
+
+        function updateTotals(subtotal) {
+            let discount = 0;
+            if (subtotal > 5000) {
+                discount = subtotal * 0.10;
+            }
+            const taxable = subtotal - discount;
+            const tax = taxable * 0.13;
+            currentGrandTotal = taxable + tax;
+
+            document.getElementById('subtotal').textContent = `NPR ${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+            document.getElementById('discount').textContent = `NPR ${discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+            document.getElementById('tax').textContent = `NPR ${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+            document.getElementById('grand-total').textContent = `NPR ${currentGrandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        }
+
+        async function checkout() {
+            if (!cart.length) {
+                ui.showToast('Please add parts to checkout.', 'error');
+                return;
+            }
+
+            if (!confirm(`CONFIRM PURCHASE?\n\nAre you sure you want to purchase these parts for a grand total of NPR ${currentGrandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}?`)) {
+                return;
+            }
+
+            const btn = document.getElementById('checkout-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="spinner"></i> Processing Order...';
+
+            const payload = {
+                items: cart.map(item => ({
+                    partId: item.partId,
+                    quantity: item.quantity
+                }))
+            };
+
+            try {
+                await api.portal.purchaseParts(payload);
+                ui.showToast('Order placed successfully!');
+                cart = [];
+                renderCart();
+                // Refresh catalog to update stock quantity
+                const partsRes = await api.parts.getAll();
+                parts = partsRes.data || partsRes || [];
+                renderCatalog(parts);
+            } catch (err) {
+                ui.showToast(err.message || 'Failed to place order.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="shopping-bag" style="width: 16px;"></i> Place Order';
+                ui.refreshIcons();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireCustomer()) return;
+            if (localStorage.getItem('staffToken')) localStorage.removeItem('staffToken');
+            ui.refreshIcons();
+            initPage();
+        });
+    </script>
+</body>
+
+</html>

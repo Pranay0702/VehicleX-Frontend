@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My History | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="customer-dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="customer-profile.html"><i data-lucide="user"></i> My Profile</a></li>
+            <li><a href="customer-history.html" class="active"><i data-lucide="history"></i> My History</a></li>
+            <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
+            <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
+            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="avatar-initials"
+                        style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                        CU</div>
+                    <div>
+                        <div id="customer-display-name" style="font-size: 0.75rem; font-weight: 600; color: #fff;">
+                            Customer</div>
+                        <div
+                            style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                            Portal User</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="logoutCustomer()"
+                style="width: 100%; border-color: var(--error); color: var(--error); padding: 8px;">
+                <i data-lucide="log-out" style="width: 14px;"></i> Log Out
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Dashboard</div>
+                    <h1>My History</h1>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+            Service Appointments</div>
+        <div class="card-elegant" style="margin-bottom: 2.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Service Type</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="services-body">
+                    <tr>
+                        <td colspan="5" class="muted-empty">Loading service history...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="services-page-info">Showing 0 entries</div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" id="btn-services-prev" onclick="changeServicesPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-services-next" onclick="changeServicesPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+            Purchase Invoices</div>
+        <div class="card-elegant">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice Number</th>
+                        <th>Date</th>
+                        <th>Parts</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="purchases-body">
+                    <tr>
+                        <td colspan="5" class="muted-empty">Loading purchase history...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="purchases-page-info">Showing 0 entries</div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" id="btn-purchases-prev" onclick="changePurchasesPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-purchases-next" onclick="changePurchasesPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; margin-top: 2rem;">
+            Requested Parts</div>
+        <div class="card-elegant" style="margin-bottom: 2.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Part Name</th>
+                        <th>Part Number</th>
+                        <th>Vehicle</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="requests-body">
+                    <tr>
+                        <td colspan="6" class="muted-empty">Loading requested parts...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="requests-page-info">Showing 0 entries</div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary" id="btn-requests-prev" onclick="changeRequestsPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-requests-next" onclick="changeRequestsPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let customerId = null;
+        let servicesData = [];
+        let servicesPage = 1;
+        
+        let purchasesData = [];
+        let purchasesPage = 1;
+        
+        let requestsData = [];
+        let requestsPage = 1;
+        
+        const ITEMS_PER_PAGE = 2;
+
+        function updatePaginationControls(type, totalItems, currentPage) {
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+            const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIdx = startIdx + ITEMS_PER_PAGE;
+
+            const infoEl = document.getElementById(`${type}-page-info`);
+            if (infoEl) {
+                infoEl.textContent = totalItems === 0 
+                    ? 'Showing 0 entries' 
+                    : `Showing ${startIdx + 1} to ${Math.min(endIdx, totalItems)} of ${totalItems} entries`;
+            }
+            
+            const btnPrev = document.getElementById(`btn-${type}-prev`);
+            const btnNext = document.getElementById(`btn-${type}-next`);
+            
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = currentPage === 1;
+                btnNext.disabled = currentPage === totalPages || totalPages === 0;
+                btnPrev.style.opacity = currentPage === 1 ? '0.5' : '1';
+                btnNext.style.opacity = (currentPage === totalPages || totalPages === 0) ? '0.5' : '1';
+            }
+        }
+
+        function logoutCustomer() {
+            api.customers.logout();
+            window.location.href = 'login.html';
+        }
+
+        async function initPage() {
+            try {
+                // Fetch profile to get ID and update sidebar
+                const response = await api.customers.getProfile();
+                const data = response.data || response;
+                customerId = data.id;
+
+                // Set the header name
+                document.getElementById('customer-display-name').textContent = data.fullName || 'Valued Customer';
+                const nameParts = (data.fullName || '').split(' ');
+                const initials = nameParts.map(p => p[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+                document.getElementById('avatar-initials').textContent = initials;
+
+                if (customerId) {
+                    await Promise.all([loadServices(), loadPurchases(), loadPartRequests()]);
+                }
+            } catch (err) {
+                if (err.message && err.message.toLowerCase().includes('unauthorized')) {
+                    ui.showToast('Session expired or unauthorized. Logging out...', 'error');
+                    logoutCustomer();
+                } else {
+                    ui.showToast(err.message || 'Failed to load profile.', 'error');
+                }
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const res = await api.portal.getServices();
+                servicesData = res.data || res || [];
+                servicesPage = 1;
+                renderServices();
+            } catch (err) {
+                const msg = err.message || 'Failed to load service history.';
+                if (err.status === 401) { logoutCustomer(); return; }
+                const tbody = document.getElementById('services-body');
+                tbody.innerHTML = `<tr><td colspan="5" class="muted-empty">${msg}</td></tr>`;
+                ui.showToast(msg, 'error');
+            }
+        }
+
+        function changeServicesPage(delta) {
+            const totalPages = Math.ceil(servicesData.length / ITEMS_PER_PAGE);
+            const newPage = servicesPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                servicesPage = newPage;
+                renderServices();
+            }
+        }
+
+        function renderServices() {
+            const tbody = document.getElementById('services-body');
+            const startIdx = (servicesPage - 1) * ITEMS_PER_PAGE;
+            const paginatedData = servicesData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+            
+            tbody.innerHTML = '';
+            if (servicesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="muted-empty">No service history found.</td></tr>';
+            } else {
+                paginatedData.forEach(srv => {
+                    const statusName = srv.appointmentStatusName || srv.status || 'Pending';
+                    const statusColor = statusName === 'Pending' ? 'var(--warning)' :
+                        statusName === 'Completed' ? 'var(--success)' : 'var(--error)';
+                    const vehicleInfo = [srv.vehicleMake, srv.vehicleModel, srv.vehicleRegistrationNumber]
+                        .filter(Boolean).join(' ') || '--';
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td class="mono">${new Date(srv.appointmentDateUtc).toLocaleString()}</td>
+                            <td style="font-weight: 500;">${srv.serviceType}</td>
+                            <td>${vehicleInfo}</td>
+                            <td>
+                                <span style="font-size: 0.65rem; font-weight: 700; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 2px 6px; text-transform: uppercase;">
+                                    ${statusName}
+                                </span>
+                            </td>
+                            <td style="color: var(--text-dim); font-size: 0.8rem;">${srv.review?.comment || '--'}</td>
+                        </tr>
+                    `);
+                });
+            }
+            updatePaginationControls('services', servicesData.length, servicesPage);
+        }
+
+        async function loadPurchases() {
+            try {
+                const res = await api.portal.getPurchases();
+                purchasesData = res.data || res || [];
+                purchasesPage = 1;
+                renderPurchases();
+            } catch (err) {
+                const msg = err.message || 'Failed to load purchase history.';
+                if (err.status === 401) { logoutCustomer(); return; }
+                const tbody = document.getElementById('purchases-body');
+                tbody.innerHTML = `<tr><td colspan="5" class="muted-empty">${msg}</td></tr>`;
+                ui.showToast(msg, 'error');
+            }
+        }
+
+        function changePurchasesPage(delta) {
+            const totalPages = Math.ceil(purchasesData.length / ITEMS_PER_PAGE);
+            const newPage = purchasesPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                purchasesPage = newPage;
+                renderPurchases();
+            }
+        }
+
+        function renderPurchases() {
+            const tbody = document.getElementById('purchases-body');
+            const startIdx = (purchasesPage - 1) * ITEMS_PER_PAGE;
+            const paginatedData = purchasesData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+            
+            tbody.innerHTML = '';
+            if (purchasesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="muted-empty">No purchase history found.</td></tr>';
+            } else {
+                paginatedData.forEach(pur => {
+                    const items = pur.items || [];
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td class="mono" style="color: var(--accent); font-weight: 500;">${pur.invoiceNumber}</td>
+                            <td class="mono">${new Date(pur.purchaseDateUtc).toLocaleDateString()}</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">
+                                ${items.length > 0
+                            ? items.map(i => `${i.quantity}x ${i.partName || 'Part'}`).join(', ')
+                            : '--'}
+                            </td>
+                            <td class="mono">NPR ${Number(pur.totalAmount).toFixed(2)}</td>
+                            <td class="mono" style="color: var(--text-dim);">${pur.statusName || '--'}</td>
+                        </tr>
+                    `);
+                });
+            }
+            updatePaginationControls('purchases', purchasesData.length, purchasesPage);
+        }
+
+        async function loadPartRequests() {
+            try {
+                const res = await api.portal.getPartRequests(customerId);
+                requestsData = res.data || res || [];
+                requestsPage = 1;
+                renderRequests();
+            } catch (err) {
+                const msg = err.message || 'Failed to load part requests.';
+                if (err.status === 401) { logoutCustomer(); return; }
+                const tbody = document.getElementById('requests-body');
+                tbody.innerHTML = `<tr><td colspan="6" class="muted-empty">${msg}</td></tr>`;
+                ui.showToast(msg, 'error');
+            }
+        }
+
+        function changeRequestsPage(delta) {
+            const totalPages = Math.ceil(requestsData.length / ITEMS_PER_PAGE);
+            const newPage = requestsPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                requestsPage = newPage;
+                renderRequests();
+            }
+        }
+
+        function renderRequests() {
+            const tbody = document.getElementById('requests-body');
+            const startIdx = (requestsPage - 1) * ITEMS_PER_PAGE;
+            const paginatedData = requestsData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+            
+            tbody.innerHTML = '';
+            if (requestsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="muted-empty">No part requests found.</td></tr>';
+            } else {
+                paginatedData.forEach(req => {
+                    const statusName = req.statusName || req.status || 'Pending';
+                    const statusColor = statusName === 'Pending' ? 'var(--warning)' :
+                        (statusName === 'Available' || statusName === 'Closed') ? 'var(--success)' : 'var(--accent)';
+                    const vehicleInfo = [req.vehicleMake, req.vehicleModel].filter(Boolean).join(' ') || '--';
+
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr>
+                            <td style="font-weight: 600; color: #fff;">${req.partName}</td>
+                            <td class="mono" style="color: var(--text-muted);">${req.partNumber || '--'}</td>
+                            <td>${vehicleInfo}</td>
+                            <td class="mono">${req.quantity}</td>
+                            <td>
+                                <span style="font-size: 0.65rem; font-weight: 700; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 2px 6px; text-transform: uppercase;">
+                                    ${statusName}
+                                </span>
+                            </td>
+                            <td style="color: var(--text-dim); font-size: 0.8rem;">${req.notes || '--'}</td>
+                        </tr>
+                    `);
+                });
+            }
+            updatePaginationControls('requests', requestsData.length, requestsPage);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireCustomer()) return;
+            if (localStorage.getItem('staffToken')) localStorage.removeItem('staffToken');
+            ui.refreshIcons();
+            initPage();
+        });
+    </script>
+</body>
+
+</html>
