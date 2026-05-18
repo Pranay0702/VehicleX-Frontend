@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Services | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a href="vendors.html"><i data-lucide="users"></i> Vendors</a></li>
+            <li><a href="parts.html"><i data-lucide="package"></i> Parts</a></li>
+            <li><a href="purchases.html"><i data-lucide="shopping-cart"></i> Purchases</a></li>
+            <li><a href="customer-services.html" class="active"><i data-lucide="calendar-check"></i> Customer Services</a></li>
+            <li><a href="staff.html"><i data-lucide="user-cog"></i> Staff</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 32px; height: 32px; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;">
+                    AD</div>
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #fff;">Admin</div>
+                    <div
+                        style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Operations</div>
+                    <h1>Service Desk</h1>
+                </div>
+                <button class="btn btn-secondary" onclick="syncWorkspace()">
+                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Sync Records
+                </button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="form-group">
+                <label>Customer Account</label>
+                <select id="customer-id" onchange="syncWorkspace()">
+                    <option value="">-- Select Customer --</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                <button class="btn btn-primary" onclick="showAppointmentModal()">
+                    <i data-lucide="calendar-plus" style="width: 14px;"></i> Book Appointment
+                </button>
+                <button class="btn btn-secondary" onclick="showPartRequestModal()">
+                    <i data-lucide="package-search" style="width: 14px;"></i> Request Part
+                </button>
+                <button class="btn btn-secondary" onclick="showReviewModal()">
+                    <i data-lucide="star" style="width: 14px;"></i> Review Service
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Appointments</div>
+                <div id="stat-appointments" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Part Requests</div>
+                <div id="stat-requests" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Reviews</div>
+                <div id="stat-reviews" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Purchases</div>
+                <div id="stat-history" class="stat-value">--</div>
+            </div>
+        </div>
+
+        <div class="subnav">
+            <button class="btn btn-secondary active" onclick="showPanel('appointments-panel', this)">Appointments</button>
+            <button class="btn btn-secondary" onclick="showPanel('requests-panel', this)">Part Requests</button>
+            <button class="btn btn-secondary" onclick="showPanel('reviews-panel', this)">Reviews</button>
+            <button class="btn btn-secondary" onclick="showPanel('history-panel', this)">History</button>
+        </div>
+
+        <section id="appointments-panel" class="tab-panel active">
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service Type</th>
+                            <th>Schedule</th>
+                            <th>Vehicle</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointments-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="requests-panel" class="tab-panel">
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Part</th>
+                            <th>Part Number</th>
+                            <th>Vehicle</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requests-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="reviews-panel" class="tab-panel">
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Review</th>
+                            <th>Appointment</th>
+                            <th>Rating</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviews-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="history-panel" class="tab-panel">
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+                Purchase History</div>
+            <div class="card-elegant" style="margin-bottom: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Items</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchase-history-body"></tbody>
+                </table>
+            </div>
+
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+                Service History</div>
+            <div class="card-elegant">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Vehicle</th>
+                            <th>Status</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
+                    <tbody id="service-history-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="appointment-modal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <div class="modal">
+            <h2>Appointment Booking</h2>
+            <form id="appointment-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Service Type</label>
+                        <input type="text" id="appointment-service" required placeholder="e.g. Brake inspection">
+                    </div>
+                    <div class="form-group">
+                        <label>Appointment Date</label>
+                        <input type="datetime-local" id="appointment-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Make</label>
+                        <input type="text" id="appointment-make" placeholder="e.g. Toyota">
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Model</label>
+                        <input type="text" id="appointment-model" placeholder="e.g. Corolla">
+                    </div>
+                    <div class="form-group span-2">
+                        <label>Registration Number</label>
+                        <input type="text" id="appointment-reg" placeholder="Vehicle plate / registration">
+                    </div>
+                    <div class="form-group span-2">
+                        <label>Service Notes</label>
+                        <textarea id="appointment-notes" style="min-height: 80px;" placeholder="Customer issue, preferred time, or extra details..."></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Commit Booking</button>
+                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('appointment-modal')">Discard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="part-request-modal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <div class="modal">
+            <h2>Unavailable Part Request</h2>
+            <form id="part-request-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Part Name</label>
+                        <input type="text" id="request-part-name" required placeholder="e.g. ABS Sensor">
+                    </div>
+                    <div class="form-group">
+                        <label>Part Number</label>
+                        <input type="text" id="request-part-number" placeholder="Optional reference">
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Make</label>
+                        <input type="text" id="request-make">
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Model</label>
+                        <input type="text" id="request-model">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="request-quantity" min="1" value="1" required class="mono">
+                    </div>
+                    <div class="form-group span-2">
+                        <label>Request Notes</label>
+                        <textarea id="request-notes" style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Submit Request</button>
+                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('part-request-modal')">Discard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="review-modal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <div class="modal">
+            <h2>Service Review</h2>
+            <form id="review-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Appointment</label>
+                        <select id="review-appointment">
+                            <option value="">General Review</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select id="review-rating" required>
+                            <option value="Five">Five</option>
+                            <option value="Four">Four</option>
+                            <option value="Three">Three</option>
+                            <option value="Two">Two</option>
+                            <option value="One">One</option>
+                        </select>
+                    </div>
+                    <div class="form-group span-2">
+                        <label>Comment</label>
+                        <textarea id="review-comment" required minlength="3" style="min-height: 100px;" placeholder="Service quality, staff response, and result..."></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1px; background: var(--border-bright);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Publish Review</button>
+                    <button type="button" class="btn btn-secondary" onclick="ui.hideModal('review-modal')">Discard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let appointments = [];
+
+        function selectedCustomerId() {
+            return parseInt(document.getElementById('customer-id').value);
+        }
+
+        function requireCustomer() {
+            if (selectedCustomerId()) return true;
+            ui.showToast('Select a customer account first.', 'error');
+            return false;
+        }
+
+        function showPanel(panelId, button) {
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.subnav button').forEach(item => item.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            button.classList.add('active');
+        }
+
+        function statusBadge(text) {
+            const value = text || 'Pending';
+            const lower = value.toLowerCase();
+            const type = lower.includes('complete') || lower.includes('available') ? 'success' : lower.includes('cancel') ? 'error' : 'warning';
+            return `<span class="status-pill ${type}">${value}</span>`;
+        }
+
+        function emptyRow(colspan, text) {
+            return `<tr><td colspan="${colspan}" class="muted-empty">${text}</td></tr>`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '--';
+            return new Date(value).toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function money(value) {
+            return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+        }
+
+        function vehicleText(item) {
+            return [item.vehicleMake, item.vehicleModel, item.vehicleRegistrationNumber].filter(Boolean).join(' ') || '--';
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await api.customers.getAll();
+                const customers = response.data || [];
+                const select = document.getElementById('customer-id');
+                select.innerHTML = '<option value="">-- Select Customer --</option>';
+                customers.forEach(customer => {
+                    const option = document.createElement('option');
+                    option.value = customer.id;
+                    option.textContent = `${customer.fullName} | ${customer.email}`;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                ui.showToast(err.message || 'Customer sync failed.', 'error');
+            }
+        }
+
+        async function syncWorkspace() {
+            const customerId = selectedCustomerId();
+            if (!customerId) {
+                renderAppointments([]);
+                renderRequests([]);
+                renderReviews([]);
+                renderHistory({ purchaseHistory: [], serviceHistory: [] });
+                setStats(0, 0, 0, 0);
+                return;
+            }
+
+            try {
+                const [appointmentRes, requestRes, reviewRes, historyRes] = await Promise.all([
+                    api.appointments.getByCustomer(customerId),
+                    api.unavailablePartRequests.getByCustomer(customerId),
+                    api.serviceReviews.getByCustomer(customerId),
+                    api.customerHistory.getAll(customerId)
+                ]);
+
+                appointments = appointmentRes.data || [];
+                const requests = requestRes.data || [];
+                const reviews = reviewRes.data || [];
+                const history = historyRes.data || { purchaseHistory: [], serviceHistory: [] };
+
+                renderAppointments(appointments);
+                renderRequests(requests);
+                renderReviews(reviews);
+                renderHistory(history);
+                populateReviewAppointments();
+                setStats(appointments.length, requests.length, reviews.length, (history.purchaseHistory || []).length);
+            } catch (err) {
+                ui.showToast(err.message || 'Workspace sync failed.', 'error');
+            }
+        }
+
+        function setStats(appointmentCount, requestCount, reviewCount, purchaseCount) {
+            document.getElementById('stat-appointments').textContent = appointmentCount;
+            document.getElementById('stat-requests').textContent = requestCount;
+            document.getElementById('stat-reviews').textContent = reviewCount;
+            document.getElementById('stat-history').textContent = purchaseCount;
+        }
+
+        function renderAppointments(items) {
+            const tbody = document.getElementById('appointments-body');
+            tbody.innerHTML = items.length ? '' : emptyRow(5, 'No appointments logged');
+            items.forEach(item => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.serviceType}</span></td>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(item.appointmentDateUtc)}</td>
+                        <td>${vehicleText(item)}</td>
+                        <td>${statusBadge(item.statusName || item.status)}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${item.notes || '--'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function renderRequests(items) {
+            const tbody = document.getElementById('requests-body');
+            tbody.innerHTML = items.length ? '' : emptyRow(6, 'No unavailable part requests logged');
+            items.forEach(item => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.partName}</span></td>
+                        <td class="mono" style="color: var(--text-muted);">${item.partNumber || '--'}</td>
+                        <td>${[item.vehicleMake, item.vehicleModel].filter(Boolean).join(' ') || '--'}</td>
+                        <td class="mono">${item.quantity}</td>
+                        <td>${statusBadge(item.statusName || item.status)}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${item.notes || '--'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function renderReviews(items) {
+            const tbody = document.getElementById('reviews-body');
+            tbody.innerHTML = items.length ? '' : emptyRow(4, 'No service reviews submitted');
+            items.forEach(item => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td style="color: var(--text-main);">${item.comment}</td>
+                        <td class="mono" style="color: var(--text-muted);">${item.appointmentId || 'GENERAL'}</td>
+                        <td>${statusBadge(item.ratingName || item.rating)}</td>
+                        <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(item.createdAtUtc)}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function renderHistory(history) {
+            const purchases = history.purchaseHistory || [];
+            const services = history.serviceHistory || [];
+            const purchaseBody = document.getElementById('purchase-history-body');
+            const serviceBody = document.getElementById('service-history-body');
+
+            purchaseBody.innerHTML = purchases.length ? '' : emptyRow(5, 'No purchase history available');
+            purchases.forEach(item => {
+                const itemSummary = (item.items || []).map(line => `${line.partName} x${line.quantity}`).join(', ') || '--';
+                purchaseBody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="mono" style="color: var(--accent); font-weight: 600;">${item.invoiceNumber}</td>
+                        <td style="color: var(--text-muted);">${formatDate(item.purchaseDateUtc)}</td>
+                        <td class="mono">${money(item.totalAmount)}</td>
+                        <td>${statusBadge(item.statusName || item.status)}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${itemSummary}</td>
+                    </tr>
+                `);
+            });
+
+            serviceBody.innerHTML = services.length ? '' : emptyRow(5, 'No service history available');
+            services.forEach(item => {
+                serviceBody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.serviceType}</span></td>
+                        <td style="color: var(--text-muted);">${formatDate(item.appointmentDateUtc)}</td>
+                        <td>${vehicleText(item)}</td>
+                        <td>${statusBadge(item.appointmentStatusName || item.appointmentStatus)}</td>
+                        <td style="color: var(--text-dim); font-size: 0.8rem;">${item.review ? item.review.comment : '--'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function populateReviewAppointments() {
+            const select = document.getElementById('review-appointment');
+            select.innerHTML = '<option value="">General Review</option>';
+            appointments.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `#${item.id} | ${item.serviceType} | ${formatDate(item.appointmentDateUtc)}`;
+                select.appendChild(option);
+            });
+        }
+
+        function showAppointmentModal() {
+            if (!requireCustomer()) return;
+            ui.showModal('appointment-modal');
+        }
+
+        function showPartRequestModal() {
+            if (!requireCustomer()) return;
+            ui.showModal('part-request-modal');
+        }
+
+        function showReviewModal() {
+            if (!requireCustomer()) return;
+            populateReviewAppointments();
+            ui.showModal('review-modal');
+        }
+
+        document.getElementById('appointment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!requireCustomer()) return;
+
+            const data = {
+                customerId: selectedCustomerId(),
+                appointmentDateUtc: new Date(document.getElementById('appointment-date').value).toISOString(),
+                serviceType: document.getElementById('appointment-service').value,
+                vehicleMake: document.getElementById('appointment-make').value || null,
+                vehicleModel: document.getElementById('appointment-model').value || null,
+                vehicleRegistrationNumber: document.getElementById('appointment-reg').value || null,
+                notes: document.getElementById('appointment-notes').value || null
+            };
+
+            try {
+                await api.appointments.book(data);
+                ui.showToast('Appointment booked.');
+                ui.hideModal('appointment-modal');
+                syncWorkspace();
+            } catch (err) {
+                ui.showToast(err.message || 'Booking failed.', 'error');
+            }
+        });
+
+        document.getElementById('part-request-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!requireCustomer()) return;
+
+            const data = {
+                customerId: selectedCustomerId(),
+                partName: document.getElementById('request-part-name').value,
+                partNumber: document.getElementById('request-part-number').value || null,
+                vehicleMake: document.getElementById('request-make').value || null,
+                vehicleModel: document.getElementById('request-model').value || null,
+                quantity: parseInt(document.getElementById('request-quantity').value),
+                notes: document.getElementById('request-notes').value || null
+            };
+
+            try {
+                await api.unavailablePartRequests.create(data);
+                ui.showToast('Part request submitted.');
+                ui.hideModal('part-request-modal');
+                syncWorkspace();
+            } catch (err) {
+                ui.showToast(err.message || 'Request failed.', 'error');
+            }
+        });
+
+        document.getElementById('review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!requireCustomer()) return;
+
+            const appointmentId = document.getElementById('review-appointment').value;
+            const data = {
+                customerId: selectedCustomerId(),
+                appointmentId: appointmentId ? parseInt(appointmentId) : null,
+                rating: document.getElementById('review-rating').value,
+                comment: document.getElementById('review-comment').value
+            };
+
+            try {
+                await api.serviceReviews.create(data);
+                ui.showToast('Review published.');
+                ui.hideModal('review-modal');
+                syncWorkspace();
+            } catch (err) {
+                ui.showToast(err.message || 'Review failed.', 'error');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            ui.refreshIcons();
+            await loadCustomers();
+            setStats(0, 0, 0, 0);
+            renderAppointments([]);
+            renderRequests([]);
+            renderReviews([]);
+            renderHistory({ purchaseHistory: [], serviceHistory: [] });
+        });
+    </script>
+</body>
+
+</html>

@@ -55,6 +55,45 @@ const api = {
         getAll: () => api.fetch('/purchases'),
         getById: (id) => api.fetch(`/purchases/${id}`),
         create: (data) => api.fetch('/purchases', { method: 'POST', body: JSON.stringify(data) }),
+    },
+
+    customers: {
+        getAll: () => api.fetch('/customers'),
+        getById: (id) => api.fetch(`/customers/${id}`),
+        search: (term) => api.fetch(`/customers/search?searchTerm=${encodeURIComponent(term)}`),
+    },
+
+    appointments: {
+        getAll: () => api.fetch('/appointments'),
+        getByCustomer: (customerId) => api.fetch(`/appointments/customer/${customerId}`),
+        book: (data) => api.fetch('/appointments', { method: 'POST', body: JSON.stringify(data) }),
+    },
+
+    unavailablePartRequests: {
+        getAll: () => api.fetch('/unavailable-part-requests'),
+        getByCustomer: (customerId) => api.fetch(`/unavailable-part-requests/customer/${customerId}`),
+        create: (data) => api.fetch('/unavailable-part-requests', { method: 'POST', body: JSON.stringify(data) }),
+    },
+
+    serviceReviews: {
+        getAll: () => api.fetch('/service-reviews'),
+        getByCustomer: (customerId) => api.fetch(`/service-reviews/customer/${customerId}`),
+        create: (data) => api.fetch('/service-reviews', { method: 'POST', body: JSON.stringify(data) }),
+    },
+
+    customerHistory: {
+        getAll: (customerId) => api.fetch(`/customers/${customerId}/history`),
+        getPurchases: (customerId) => api.fetch(`/customers/${customerId}/history/purchases`),
+        getServices: (customerId) => api.fetch(`/customers/${customerId}/history/services`),
+    },
+
+    staff: {
+        getAll: () => api.fetch('/staff'),
+        getById: (id) => api.fetch(`/staff/${id}`),
+        create: (data) => api.fetch('/staff', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id, data) => api.fetch(`/staff/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        updateRole: (id, data) => api.fetch(`/staff/${id}/role`, { method: 'PATCH', body: JSON.stringify(data) }),
+        delete: (id) => api.fetch(`/staff/${id}`, { method: 'DELETE' }),
     }
 };
 
