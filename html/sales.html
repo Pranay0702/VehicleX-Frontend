@@ -254,6 +254,9 @@
             </div>
 
             <div class="invoice-actions" style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="emailInvoice()" id="btn-email-invoice">
+                    <i data-lucide="mail" style="width: 14px;"></i> Email Invoice
+                </button>
                 <button class="btn btn-secondary" onclick="printInvoice()">
                     <i data-lucide="printer" style="width: 14px;"></i> Print Invoice
                 </button>
@@ -597,6 +600,48 @@
 
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             ui.refreshIcons();
+        }
+
+        async function emailInvoice() {
+            if (!currentInvoice) {
+                ui.showToast('Create an invoice before emailing.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-email-invoice');
+            const originalHtml = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 14px;"></i> Sending...`;
+                ui.refreshIcons();
+
+                const invoiceId = currentInvoice.invoiceId || currentInvoice.id;
+                const response = await api.email.sendInvoice(invoiceId);
+                
+                // For backend 500 errors, the api.js might throw, but if it returns an error object:
+                if (response && response.status === 'error') {
+                    throw new Error(response.message || 'Failed to email invoice');
+                }
+                
+                ui.showToast(`Invoice sent successfully to ${response.data?.sentTo || 'customer'}`);
+            } catch (err) {
+                console.error("Email Error:", err);
+                // Make the error handling extremely robust to catch all variations of the 5.7.8 Auth error
+                const errorMsg = String(err.message || err).toLowerCase();
+                
+                if (errorMsg.includes('5.7.8') || errorMsg.includes('authentication') || errorMsg.includes('credentials') || errorMsg.includes('badcredentials') || errorMsg.includes('535')) {
+                    ui.showToast('Google blocked the email. You MUST use a 16-character Google "App Password" in your backend appsettings.json, not your normal Gmail password.', 'error');
+                } else if (errorMsg.includes('failed to fetch') || errorMsg.includes('network')) {
+                    ui.showToast('Network error: Backend server might be down or unreachable.', 'error');
+                } else {
+                    ui.showToast('Email failed: Check backend terminal logs for the exact SMTP error.', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                ui.refreshIcons();
+            }
         }
 
         function printInvoice() {

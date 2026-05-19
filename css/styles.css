@@ -767,6 +767,16 @@ textarea:focus {
     gap: 0.8rem 1.5rem;
 }
 
+/* Animations */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
 @media print {
     /* Hide everything by default */
     body * {

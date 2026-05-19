@@ -226,6 +226,10 @@ const api = {
         getInvoiceById: (id) => api.fetch(`/sales/invoices/${id}`, {}, 'staff'),
     },
 
+    email: {
+        sendInvoice: (invoiceId) => api.fetch(`/email/invoice/${invoiceId}`, { method: 'POST' }, 'staff')
+    },
+
     reports: {
         getDaily: (date) => api.fetch(`/reports/financial/daily?date=${date}`, {}, 'staff'),
         getMonthly: (year, month) => api.fetch(`/reports/financial/monthly?year=${year}&month=${month}`, {}, 'staff'),
