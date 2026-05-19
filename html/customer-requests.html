@@ -159,6 +159,12 @@
             <div class="card-elegant" style="padding: 2rem; max-width: 600px;">
                 <form id="review-form">
                     <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label>Select Completed Service *</label>
+                        <select id="rev-appointment" required>
+                            <option value="">-- Select a Service --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
                         <label>Rating (1 to 5 Stars) *</label>
                         <select id="rev-rating" required>
                             <option value="5">5 - Excellent</option>
@@ -200,7 +206,12 @@
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
                 tab.classList.add('active');
-                document.getElementById(tab.dataset.target).classList.add('active');
+                const target = tab.dataset.target;
+                document.getElementById(target).classList.add('active');
+
+                if (target === 'tab-review') {
+                    loadCompletedAppointments();
+                }
             });
         });
 
@@ -218,6 +229,7 @@
 
                 // Load vehicles for appointment dropdown
                 loadVehicles();
+                loadCompletedAppointments(); // Pre-load reviews if possible
             } catch (err) {
                 if (err.message && err.message.toLowerCase().includes('unauthorized')) {
                     ui.showToast('Session expired or unauthorized. Logging out...', 'error');
@@ -225,6 +237,36 @@
                 } else {
                     ui.showToast(err.message || 'Failed to load profile.', 'error');
                 }
+            }
+        }
+
+        async function loadCompletedAppointments() {
+            try {
+                const res = await api.portal.getServices();
+                const services = res.data || res || [];
+                const select = document.getElementById('rev-appointment');
+                select.innerHTML = '<option value="">-- Select a Service --</option>';
+
+                // Filter for completed services without a review
+                const completed = services.filter(s => 
+                    (s.appointmentStatusName === 'Completed' || s.appointmentStatus === 3) && !s.review
+                );
+
+                if (completed.length === 0) {
+                    select.innerHTML = '<option value="">-- No pending reviews --</option>';
+                    return;
+                }
+
+                completed.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.appointmentId;
+                    const date = new Date(s.appointmentDateUtc).toLocaleDateString();
+                    opt.textContent = `${s.serviceType} - ${date} (${s.vehicleMake} ${s.vehicleModel})`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+                ui.showToast('Failed to load completed services.', 'error');
             }
         }
 
@@ -288,7 +330,14 @@
         // Handle Review Submission
         document.getElementById('review-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const appointmentId = parseInt(document.getElementById('rev-appointment').value);
+            if (!appointmentId) {
+                ui.showToast('Please select a service to review.', 'error');
+                return;
+            }
+
             const data = {
+                appointmentId: appointmentId,
                 rating: parseInt(document.getElementById('rev-rating').value),
                 comment: document.getElementById('rev-comment').value.trim()
             };
@@ -297,6 +346,7 @@
                 await api.portal.submitReview(data);
                 ui.showToast('Thank you for your feedback!');
                 document.getElementById('review-form').reset();
+                loadCompletedAppointments(); // Refresh list
             } catch (err) {
                 const msg = err.errors?.length ? err.errors[0] : err.message;
                 ui.showToast(msg || 'Failed to submit review.', 'error');

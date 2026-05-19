@@ -14,7 +14,7 @@ const api = {
         const staffToken = localStorage.getItem('staffToken');
 
         const useCustomer = authMode === 'customer'
-            || (authMode === 'auto' && (endpoint.startsWith('/portal') || endpoint.includes('/customers/my-history') || endpoint === '/customers/profile' || endpoint.startsWith('/customers/vehicles')));
+            || (authMode === 'auto' && (endpoint.startsWith('/portal') || endpoint === '/customers/profile' || endpoint.startsWith('/customers/vehicles')));
         const useStaff = authMode === 'staff' || (authMode === 'auto' && !useCustomer && staffToken);
 
         if (useStaff && staffToken) {
@@ -115,8 +115,8 @@ const api = {
         purchaseParts: (data) => api.fetch('/portal/purchase-parts', { method: 'POST', body: JSON.stringify(data) }, 'customer'),
         getHistory: () => api.fetch('/portal/history', {}, 'customer'),
         getPartRequests: (customerId) => api.fetch(`/unavailable-part-requests/customer/${customerId}`, {}, 'customer'),
-        getPurchases: () => api.fetch('/customers/my-history/purchases', {}, 'customer'),
-        getServices: () => api.fetch('/customers/my-history/services', {}, 'customer'),
+        getPurchases: () => api.fetch('/portal/history/purchases', {}, 'customer'),
+        getServices: () => api.fetch('/portal/history/services', {}, 'customer'),
     },
 
     appointments: {

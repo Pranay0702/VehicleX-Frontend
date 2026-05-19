@@ -249,9 +249,9 @@
                 const regulars = regularsRes.data || [];
                 regBody.innerHTML = regulars.length ? regulars.map(c => `
                     <tr>
-                        <td style="font-weight: 500;">${c.customerName}</td>
-                        <td class="mono">${c.orderCount}</td>
-                        <td class="mono">NPR ${c.totalSpend.toLocaleString()}</td>
+                        <td style="font-weight: 500;">${c.fullName}</td>
+                        <td class="mono">${c.totalPurchases}</td>
+                        <td class="mono">--</td>
                     </tr>
                 `).join('') : '<tr><td colspan="3" class="muted-empty">No regulars found</td></tr>';
 
@@ -260,9 +260,9 @@
                 const highSpenders = highSpendersRes.data || [];
                 highBody.innerHTML = highSpenders.length ? highSpenders.map(c => `
                     <tr>
-                        <td style="font-weight: 500;">${c.customerName}</td>
-                        <td class="mono">${c.orderCount}</td>
-                        <td class="mono">NPR ${c.totalSpend.toLocaleString()}</td>
+                        <td style="font-weight: 500;">${c.fullName}</td>
+                        <td class="mono">--</td>
+                        <td class="mono">NPR ${c.totalAmountSpent.toLocaleString()}</td>
                     </tr>
                 `).join('') : '<tr><td colspan="3" class="muted-empty">No high spenders found</td></tr>';
 
@@ -271,26 +271,41 @@
                 const credits = creditsRes.data || [];
                 creditBody.innerHTML = credits.length ? credits.map(c => `
                     <tr>
-                        <td style="font-weight: 500;">${c.customerName}</td>
-                        <td class="mono" style="color: var(--accent);">${c.invoiceNumber}</td>
-                        <td class="mono" style="color: var(--error);">NPR ${c.pendingAmount.toLocaleString()}</td>
+                        <td style="font-weight: 500;">${c.fullName}</td>
+                        <td class="mono" style="color: var(--accent);">${c.unpaidInvoiceCount} Invoices</td>
+                        <td class="mono" style="color: var(--error);">NPR ${c.totalCreditOwed.toLocaleString()}</td>
                     </tr>
                 `).join('') : '<tr><td colspan="3" class="muted-empty">No pending credits</td></tr>';
 
-                // Render Intelligence
-                const intel = intelRes.data || {};
+                // Calculate Intelligence Summary from the list
+                const intelList = intelRes.data || [];
+                const totalCustomers = intelList.length;
+                const totalSpent = intelList.reduce((sum, c) => sum + (c.totalAmountSpent || 0), 0);
+                const totalOrders = intelList.reduce((sum, c) => sum + (c.totalPurchases || 0), 0);
+                const regularsCount = intelList.filter(c => c.isRegular).length;
+                
+                const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
+                const repeatCount = intelList.filter(c => c.totalPurchases > 1).length;
+                const repeatRate = totalCustomers > 0 ? (repeatCount / totalCustomers) * 100 : 0;
+
+                const intel = {
+                    averageOrderValue: avgOrderValue,
+                    totalLoyaltyMembers: regularsCount,
+                    repeatCustomerRate: repeatRate,
+                    totalCustomerCount: totalCustomers
+                };
                 
                 // Store data for export
                 lastCustomerData = {
-                    regulars: regulars,
-                    highSpenders: highSpenders,
-                    credits: credits,
+                    regulars: regulars.map(c => ({ customerName: c.fullName, orderCount: c.totalPurchases, totalSpend: 0 })),
+                    highSpenders: highSpenders.map(c => ({ customerName: c.fullName, orderCount: 0, totalSpend: c.totalAmountSpent })),
+                    credits: credits.map(c => ({ customerName: c.fullName, invoiceNumber: `${c.unpaidInvoiceCount} Unpaid`, pendingAmount: c.totalCreditOwed })),
                     intel: intel
                 };
 
-                document.getElementById('intel-avg-order').textContent = `NPR ${(intel.averageOrderValue || 0).toLocaleString()}`;
+                document.getElementById('intel-avg-order').textContent = `NPR ${intel.averageOrderValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 document.getElementById('intel-loyalty').textContent = intel.totalLoyaltyMembers || 0;
-                document.getElementById('intel-repeat').textContent = `${(intel.repeatCustomerRate || 0).toFixed(1)}%`;
+                document.getElementById('intel-repeat').textContent = `${intel.repeatCustomerRate.toFixed(1)}%`;
                 document.getElementById('intel-total').textContent = intel.totalCustomerCount || 0;
 
             } catch (err) {
