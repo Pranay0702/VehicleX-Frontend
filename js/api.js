@@ -319,15 +319,16 @@ const ui = {
             { href: 'parts.html', icon: 'package', label: 'Parts' },
             { href: 'customers.html', icon: 'user', label: 'Customers' },
             { href: 'customer-services.html', icon: 'calendar-check', label: 'Customer Services' },
+            { href: 'notifications.html', icon: 'bell', label: 'Notifications' },
             {
                 label: 'Reports',
                 icon: 'file-text',
                 isDropdown: true,
                 items: [
                     { href: 'financial-reports.html', icon: 'bar-chart-3', label: 'Financial' },
-                    { href: 'loyalty-reports.html', icon: 'award', label: 'Loyalty' }
+                    { href: 'loyalty-reports.html', icon: 'award', label: 'Loyalty' },
                 ]
-            }
+            },
         ];
         if (!isAdmin) {
             links.splice(2, 0, { href: 'sales.html', icon: 'receipt', label: 'Sales' });

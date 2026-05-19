@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Notifications | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .alert-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            border-color: var(--border-bright);
+        }
+
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .alert-card.error::before {
+            background-color: var(--error);
+        }
+
+        .alert-card.warning::before {
+            background-color: var(--warning);
+        }
+
+        .alert-icon-container {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .alert-card.error .alert-icon-container {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert-card.warning .alert-icon-container {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .alert-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .alert-message {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .alert-btn {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            color: #fff;
+            border-color: var(--text-main);
+        }
+
+        .filter-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .filter-btn.active.error-filter {
+            background: var(--error);
+            border-color: var(--error);
+            color: #fff;
+        }
+
+        .filter-btn.active.warning-filter {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <!-- Dynamically populated -->
+        </ul>
+        <div class="sidebar-footer">
+            <!-- Dynamically populated -->
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        System Monitoring</div>
+                    <h1>Notifications & Alerts</h1>
+                </div>
+                <button class="btn btn-secondary" onclick="loadNotifications()">
+                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh Alerts
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-label">Total Active Alerts</div>
+                <div id="stat-total-alerts" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Critical (Low Stock)</div>
+                <div id="stat-low-stock" class="stat-value" style="color: var(--error);">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Financial (Unpaid Credit)</div>
+                <div id="stat-unpaid-credit" class="stat-value" style="color: var(--warning);">0</div>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Filter Alerts:</span>
+            <button class="filter-btn active" onclick="setFilter('all', this)">All Notifications</button>
+            <button class="filter-btn" onclick="setFilter('error', this)">Critical (Inventory)</button>
+            <button class="filter-btn" onclick="setFilter('warning', this)">Warnings (Financial)</button>
+        </div>
+
+        <div id="notifications-container">
+            <!-- Modern alert cards injected here -->
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let allAlerts = [];
+        let currentFilter = 'all';
+
+        function setFilter(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'error-filter', 'warning-filter'));
+            btn.classList.add('active');
+            
+            if (type === 'error') btn.classList.add('error-filter');
+            if (type === 'warning') btn.classList.add('warning-filter');
+            
+            currentFilter = type;
+            renderNotifications();
+        }
+
+        async function loadNotifications() {
+            try {
+                const container = document.getElementById('notifications-container');
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 4rem;">Analyzing system state...</div>';
+
+                const [partsRes, creditsRes] = await Promise.all([
+                    api.parts.getAll(),
+                    api.reports.getPendingCredits()
+                ]);
+
+                const parts = partsRes.data || [];
+                const credits = creditsRes.data || [];
+                
+                allAlerts = [];
+                const now = new Date().toISOString();
+
+                // 1. Process Low Stock
+                parts.filter(p => p.stockQuantity < 10).forEach(p => {
+                    allAlerts.push({
+                        type: 'error',
+                        icon: 'package',
+                        category: 'Inventory',
+                        title: 'Critical Low Stock Alert',
+                        message: `The item <span style="color:#fff; font-weight:600;">${p.name}</span> (SKU: <span class="mono">${p.partNumber}</span>) has fallen below the safety threshold. Only <span style="color:var(--error); font-weight:700;">${p.stockQuantity} units</span> remain in stock. Immediate restock recommended.`,
+                        link: 'parts.html',
+                        actionLabel: 'Restock Part',
+                        timestamp: now
+                    });
+                });
+
+                // 2. Process Unpaid Credits
+                credits.forEach(c => {
+                    allAlerts.push({
+                        type: 'warning',
+                        icon: 'credit-card',
+                        category: 'Financial',
+                        title: 'Outstanding Credit Balance',
+                        message: `Customer <span style="color:#fff; font-weight:600;">${c.fullName}</span> has <span style="color:var(--warning); font-weight:700;">${c.unpaidInvoiceCount} unpaid invoice(s)</span> totaling a pending balance of <span class="mono" style="color:var(--warning); font-weight:700;">NPR ${c.totalCreditOwed.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>.`,
+                        link: 'loyalty-reports.html',
+                        actionLabel: 'Review Account',
+                        timestamp: now
+                    });
+                });
+
+                // Update Stats
+                document.getElementById('stat-total-alerts').textContent = allAlerts.length;
+                document.getElementById('stat-low-stock').textContent = allAlerts.filter(a => a.type === 'error').length;
+                document.getElementById('stat-unpaid-credit').textContent = allAlerts.filter(a => a.type === 'warning').length;
+
+                renderNotifications();
+
+            } catch (err) {
+                console.error(err);
+                ui.showToast('Failed to analyze system state.', 'error');
+            }
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notifications-container');
+            const filtered = allAlerts.filter(a => currentFilter === 'all' || a.type === currentFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--text-dim); padding: 5rem 0; border: 1px dashed var(--border); border-radius: 8px;">
+                        <i data-lucide="check-circle" style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--success);"></i>
+                        <h3>System is Healthy</h3>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">No active alerts matching the selected criteria.</p>
+                    </div>
+                `;
+                ui.refreshIcons();
+                return;
+            }
+
+            container.innerHTML = filtered.map(a => `
+                <div class="alert-card ${a.type}">
+                    <div class="alert-icon-container">
+                        <i data-lucide="${a.icon}" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-header">
+                            <div class="alert-title">${a.title}</div>
+                            <div class="alert-meta">
+                                <span class="status-pill" style="font-size: 0.65rem;">${a.category}</span>
+                                <span class="mono" style="display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+                                    ${new Date(a.timestamp).toLocaleTimeString()}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="alert-message">
+                            ${a.message}
+                        </div>
+                        <div class="alert-actions">
+                            <button class="btn btn-primary alert-btn" onclick="location.href='${a.link}'">
+                                ${a.actionLabel}
+                                <i data-lucide="arrow-right" style="width: 14px; margin-left: 4px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            ui.refreshIcons();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            ui.setupStaffSidebar('notifications.html');
+            loadNotifications();
+            ui.refreshIcons();
+        });
+    </script>
+</body>
+
+</html>

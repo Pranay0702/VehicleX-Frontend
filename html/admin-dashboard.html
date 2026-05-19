@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        #notif-badge {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(1);
+        }
+        #notif-badge:not(:empty) {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        #notification-list::-webkit-scrollbar { width: 4px; }
+        #notification-list::-webkit-scrollbar-thumb { background: var(--border-bright); }
+    </style>
 </head>
 
 <body>
@@ -49,9 +65,33 @@
                         Admin Control Panel</div>
                     <h1>System Dashboard</h1>
                 </div>
-                <button class="btn btn-secondary" onclick="location.reload()">
-                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Sync Data
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <div class="dropdown-container" id="notification-dropdown">
+                        <button class="btn btn-secondary" style="position: relative;" onclick="toggleNotificationDropdown()">
+                            <i data-lucide="bell" style="width: 14px;"></i>
+                            <span id="notif-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--error); color: #fff; font-size: 0.6rem; padding: 2px 5px; border-radius: 50%; font-weight: 700; border: 2px solid var(--bg-page);">0</span>
+                        </button>
+                        <div class="dropdown-menu" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                            <div style="padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.75rem; font-weight: 700; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                                SYSTEM NOTIFICATIONS
+                                <span id="notif-count-label" class="status-pill" style="font-size: 0.6rem;">0 New</span>
+                            </div>
+                            <div id="notification-list">
+                                <div style="padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem;">
+                                    No system alerts at this time
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid var(--border); padding: 0.5rem;">
+                                <button class="btn btn-secondary" style="width: 100%; border: none; font-size: 0.7rem;" onclick="location.href='notifications.html'">
+                                    View All System Alerts
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="location.reload()">
+                        <i data-lucide="refresh-cw" style="width: 14px;"></i> Sync Data
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -145,6 +185,74 @@
         let purchasesCurrentPage = 1;
         const purchasesItemsPerPage = 5;
 
+        function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notification-dropdown');
+            dropdown.classList.toggle('open');
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notification-dropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        async function checkSystemAlerts(parts, credits) {
+            const list = document.getElementById('notification-list');
+            const badge = document.getElementById('notif-badge');
+            const label = document.getElementById('notif-count-label');
+            
+            let alerts = [];
+
+            // 1. Check for Low Stock (Stock < 10)
+            const lowStock = parts.filter(p => p.stockQuantity < 10);
+            lowStock.forEach(p => {
+                alerts.push({
+                    type: 'error',
+                    icon: 'package',
+                    title: 'Low Stock Alert',
+                    message: `${p.name} (${p.partNumber}) is running low: ${p.stockQuantity} left.`,
+                    link: 'parts.html'
+                });
+            });
+
+            // 2. Check for Pending Credits
+            credits.forEach(c => {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'credit-card',
+                    title: 'Unpaid Credit',
+                    message: `${c.fullName} owes NPR ${c.totalCreditOwed.toLocaleString()}.`,
+                    link: 'loyalty-reports.html'
+                });
+            });
+
+            if (alerts.length === 0) {
+                list.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-dim); font-size: 0.8rem;">No system alerts at this time</div>`;
+                badge.style.display = 'none';
+                label.textContent = '0 New';
+                return;
+            }
+
+            badge.style.display = 'block';
+            badge.textContent = alerts.length;
+            label.textContent = `${alerts.length} New`;
+            label.className = 'status-pill error';
+
+            list.innerHTML = alerts.map(a => `
+                <div class="dropdown-item" onclick="location.href='notifications.html'" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 1rem; border-bottom: 1px solid var(--border);">
+                    <div style="display: flex; align-items: center; gap: 8px; color: ${a.type === 'error' ? 'var(--error)' : 'var(--warning)'}; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+                        <i data-lucide="${a.icon}" style="width: 12px; height: 12px;"></i>
+                        ${a.title}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-main); line-height: 1.4;">${a.message}</div>
+                </div>
+            `).join('');
+
+            ui.refreshIcons();
+        }
+
         function renderRecentPurchases() {
             const tbody = document.getElementById('recent-purchases-body');
             tbody.innerHTML = '';
@@ -206,13 +314,14 @@
                 const year = now.getFullYear();
                 const month = now.getMonth() + 1;
 
-                const [vResponse, pResponse, purResponse, reqResponse, custResponse, reportResponse] = await Promise.all([
+                const [vResponse, pResponse, purResponse, reqResponse, custResponse, reportResponse, creditsResponse] = await Promise.all([
                     api.vendors.getAll(),
                     api.parts.getAll(),
                     api.restocks.getAll(),
                     api.unavailablePartRequests.getAll(),
                     api.customers.getAll(),
-                    api.reports.getMonthly(year, month).catch(() => ({ data: null }))
+                    api.reports.getMonthly(year, month).catch(() => ({ data: null })),
+                    api.reports.getPendingCredits().catch(() => ({ data: [] }))
                 ]);
 
                 const vendors = vResponse.data || [];
@@ -220,6 +329,7 @@
                 const purchases = purResponse.data || [];
                 const partRequests = reqResponse.data || [];
                 const customers = custResponse.data || [];
+                const credits = creditsResponse.data || [];
                 const currentReport = reportResponse.data || {
                     totalSalesRevenue: 0,
                     totalPurchaseCost: 0,
@@ -245,6 +355,7 @@
                 renderRecentPurchases();
 
                 renderCharts(parts, currentReport);
+                checkSystemAlerts(parts, credits);
             } catch (err) {
                 ui.showToast('Data synchronization failed.', 'error');
             }
