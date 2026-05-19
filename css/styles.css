@@ -127,6 +127,109 @@ nav {
     height: 16px;
 }
 
+/* ── Sidebar Dropdown ── */
+.nav-dropdown {
+    margin-bottom: 2px;
+}
+
+.nav-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    outline: none;
+}
+
+.nav-dropdown-toggle:hover {
+    color: #fff;
+    background: var(--bg-hover);
+}
+
+.nav-dropdown-toggle i {
+    width: 16px;
+    height: 16px;
+}
+
+.nav-dropdown-toggle .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+}
+
+.nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    display: none;
+    list-style: none;
+    padding-left: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.nav-dropdown.open .nav-dropdown-menu {
+    display: block;
+}
+
+/* ── Action Dropdown ── */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    min-width: 220px;
+    z-index: 500;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-top: 8px;
+}
+
+.dropdown-container.open .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: var(--transition);
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    color: #fff;
+    background: var(--bg-hover);
+}
+
+.dropdown-item i {
+    width: 14px;
+    height: 14px;
+}
+
 .sidebar-footer {
     margin-top: auto;
     padding: 1.5rem;
@@ -669,25 +772,72 @@ textarea:focus {
     .header,
     .toolbar,
     .invoice-actions,
-    #toast-container {
+    .subnav,
+    .card-elegant:has(.form-group),
+    #financial-actions,
+    #toast-container,
+    .sidebar-footer {
         display: none !important;
     }
 
     body {
-        background: #fff;
-        color: #000;
+        background: #fff !important;
+        color: #000 !important;
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     main {
-        margin: 0;
-        padding: 0;
+        margin: 0 !important;
+        padding: 20mm !important; /* Standard print margin */
+        width: 100% !important;
+        max-width: none !important;
+        display: block !important;
     }
 
-    .invoice-sheet {
-        border: 0;
-        background: #fff;
-        color: #000;
-        padding: 0;
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        background: none !important;
+        border: none !important;
+        margin-bottom: 2rem !important;
+    }
+
+    .stat-card {
+        border: 1px solid #eee !important;
+        background: #fff !important;
+        padding: 1rem !important;
+        page-break-inside: avoid;
+    }
+
+    .card-elegant {
+        border: 1px solid #eee !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        margin-bottom: 1rem !important;
+        page-break-inside: avoid;
+    }
+
+    .tab-panel {
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    canvas {
+        max-width: 100% !important;
+        height: 300px !important; /* Fixed height for print */
+    }
+
+    h1, h2, h3, .stat-value {
+        color: #000 !important;
+    }
+
+    .stat-label, .text-muted {
+        color: #666 !important;
     }
 }
 

@@ -231,6 +231,9 @@ const api = {
         getMonthly: (year, month) => api.fetch(`/reports/financial/monthly?year=${year}&month=${month}`, {}, 'staff'),
         getYearly: (year) => api.fetch(`/reports/financial/yearly?year=${year}`, {}, 'staff'),
         getAnalysis: (from, to) => api.fetch(`/reports/financial/analysis?from=${from || ''}&to=${to || ''}`, {}, 'staff'),
+        getRegularCustomers: (minPurchases = 3) => api.fetch(`/reports/customers/regulars?minPurchases=${minPurchases}`, {}, 'staff'),
+        getHighSpenders: (minAmount = 5000) => api.fetch(`/reports/customers/high-spenders?minAmount=${minAmount}`, {}, 'staff'),
+        getPendingCredits: () => api.fetch('/reports/customers/pending-credits', {}, 'staff'),
         getCustomerIntelligence: () => api.fetch('/reports/customers/intelligence', {}, 'staff'),
     }
 };
@@ -316,6 +319,15 @@ const ui = {
             { href: 'parts.html', icon: 'package', label: 'Parts' },
             { href: 'customers.html', icon: 'user', label: 'Customers' },
             { href: 'customer-services.html', icon: 'calendar-check', label: 'Customer Services' },
+            {
+                label: 'Reports',
+                icon: 'file-text',
+                isDropdown: true,
+                items: [
+                    { href: 'financial-reports.html', icon: 'bar-chart-3', label: 'Financial' },
+                    { href: 'loyalty-reports.html', icon: 'award', label: 'Loyalty' }
+                ]
+            }
         ];
         if (!isAdmin) {
             links.splice(2, 0, { href: 'sales.html', icon: 'receipt', label: 'Sales' });
@@ -337,11 +349,41 @@ const ui = {
         const isAdmin = staff.role === 'Admin';
         const nav = document.querySelector('.nav-links');
         if (nav) {
-            nav.innerHTML = this.getStaffNavLinks(isAdmin).map(link => `
-                <li><a href="${link.href}" class="${activePage === link.href ? 'active' : ''}">
-                    <i data-lucide="${link.icon}"></i> ${link.label}
-                </a></li>
-            `).join('');
+            nav.innerHTML = this.getStaffNavLinks(isAdmin).map(link => {
+                if (link.isDropdown) {
+                    const isOpen = link.items.some(item => activePage === item.href);
+                    return `
+                        <li class="nav-dropdown ${isOpen ? 'open' : ''}">
+                            <button class="nav-dropdown-toggle">
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <i data-lucide="${link.icon}"></i> ${link.label}
+                                </span>
+                                <i data-lucide="chevron-down" class="chevron"></i>
+                            </button>
+                            <ul class="nav-dropdown-menu">
+                                ${link.items.map(item => `
+                                    <li><a href="${item.href}" class="${activePage === item.href ? 'active' : ''}">
+                                        <i data-lucide="${item.icon}"></i> ${item.label}
+                                    </a></li>
+                                `).join('')}
+                            </ul>
+                        </li>
+                    `;
+                }
+                return `
+                    <li><a href="${link.href}" class="${activePage === link.href ? 'active' : ''}">
+                        <i data-lucide="${link.icon}"></i> ${link.label}
+                    </a></li>
+                `;
+            }).join('');
+
+            // Add dropdown toggle logic
+            nav.querySelectorAll('.nav-dropdown-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const parent = btn.parentElement;
+                    parent.classList.toggle('open');
+                });
+            });
         }
 
         const footer = document.querySelector('.sidebar-footer');

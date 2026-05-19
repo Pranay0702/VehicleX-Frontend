@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Reports | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <!-- Dynamically populated -->
+        </ul>
+        <div class="sidebar-footer">
+            <!-- Dynamically populated -->
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Financial Analytics</div>
+                    <h1>Financial Reports</h1>
+                </div>
+                <div id="financial-actions" style="display: none;">
+                    <div class="dropdown-container" id="export-dropdown">
+                        <button class="btn btn-primary" onclick="toggleExportDropdown()">
+                            <i data-lucide="download" style="width: 14px;"></i> Export Report
+                            <i data-lucide="chevron-down" style="width: 14px; margin-left: 8px;"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" onclick="exportToPDF()">
+                                <i data-lucide="file-text"></i> Download as PDF
+                            </button>
+                            <button class="dropdown-item" onclick="exportToExcel()">
+                                <i data-lucide="file-spreadsheet"></i> Download as Excel
+                            </button>
+                            <button class="dropdown-item" onclick="printReport()">
+                                <i data-lucide="printer"></i> Print Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-elegant" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: flex-end;">
+                <div class="form-group">
+                    <label>Report Type</label>
+                    <select id="report-type" class="form-control" onchange="toggleInputs()">
+                        <option value="daily">Daily Report</option>
+                        <option value="monthly" selected>Monthly Report</option>
+                        <option value="yearly">Yearly Report</option>
+                    </select>
+                </div>
+
+                <div id="daily-input" class="form-group" style="display: none;">
+                    <label>Select Date</label>
+                    <input type="date" id="report-date" class="form-control">
+                </div>
+
+                <div id="monthly-input" class="form-group">
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label>Year</label>
+                            <select id="report-month-year" class="form-control"></select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Month</label>
+                            <select id="report-month" class="form-control">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="yearly-input" class="form-group" style="display: none;">
+                    <label>Select Year</label>
+                    <select id="report-year" class="form-control"></select>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateFinancialReport()" style="height: 42px;">
+                    <i data-lucide="refresh-cw" style="width: 16px;"></i> Generate Report
+                </button>
+            </div>
+        </div>
+
+        <div id="financial-results" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Sales Revenue</div>
+                    <div id="res-revenue" class="stat-value" style="color: var(--success);">NPR 0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Purchase Cost</div>
+                    <div id="res-cost" class="stat-value" style="color: var(--danger);">NPR 0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Net Profit/Loss</div>
+                    <div id="res-profit" class="stat-value">NPR 0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sales Invoices</div>
+                    <div id="res-sales-count" class="stat-value">0</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <div class="card-elegant" style="padding: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1.5rem; color: #fff;">Financial Breakdown</h3>
+                    <div style="height: 300px;">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-elegant" style="padding: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1.5rem; color: #fff;">Summary Details</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-muted);">Report Period</span>
+                            <span id="res-period" style="font-weight: 500;">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-muted);">Gross Revenue</span>
+                            <span id="res-gross" class="mono">NPR 0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-muted);">Total Expenses</span>
+                            <span id="res-expenses" class="mono">NPR 0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-muted);">Profit Margin</span>
+                            <span id="res-margin" class="mono">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-data" style="display: none; text-align: center; padding: 5rem 2rem;">
+            <i data-lucide="file-x" style="width: 48px; height: 48px; color: var(--text-dim); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--text-muted);">No financial data found for this period</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">Try selecting a different date range or report type.</p>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let myChart = null;
+        let lastGeneratedData = null;
+
+        function toggleExportDropdown() {
+            const dropdown = document.getElementById('export-dropdown');
+            dropdown.classList.toggle('open');
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('export-dropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        function exportToPDF() {
+            // Browser print to PDF is the most reliable without heavy libraries
+            window.print();
+        }
+
+        function exportToExcel() {
+            if (!lastGeneratedData) return;
+
+            const data = [
+                ["Financial Report", document.getElementById('res-period').textContent],
+                ["", ""],
+                ["Metric", "Value"],
+                ["Total Sales Revenue", lastGeneratedData.totalSalesRevenue],
+                ["Total Purchase Cost", lastGeneratedData.totalPurchaseCost],
+                ["Net Profit/Loss", lastGeneratedData.netProfit || (lastGeneratedData.totalSalesRevenue - lastGeneratedData.totalPurchaseCost)],
+                ["Sales Invoices", lastGeneratedData.totalSalesInvoices || 0],
+                ["Profit Margin", document.getElementById('res-margin').textContent]
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Financial Report");
+            XLSX.writeFile(wb, `VehicleX_Financial_Report_${new Date().getTime()}.xlsx`);
+            ui.showToast('Excel report downloaded.');
+        }
+
+        function toggleInputs() {
+            const type = document.getElementById('report-type').value;
+            document.getElementById('daily-input').style.display = type === 'daily' ? 'block' : 'none';
+            document.getElementById('monthly-input').style.display = type === 'monthly' ? 'block' : 'none';
+            document.getElementById('yearly-input').style.display = type === 'yearly' ? 'block' : 'none';
+        }
+
+        function populateYears() {
+            const currentYear = new Date().getFullYear();
+            const yearSelects = ['report-month-year', 'report-year'];
+            yearSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                for (let y = currentYear; y >= currentYear - 5; y--) {
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.textContent = y;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        async function generateFinancialReport() {
+            const type = document.getElementById('report-type').value;
+            let response;
+            let periodLabel = "";
+
+            try {
+                if (type === 'daily') {
+                    const date = document.getElementById('report-date').value;
+                    if (!date) return ui.showToast('Please select a date', 'error');
+                    response = await api.reports.getDaily(date);
+                    periodLabel = new Date(date).toLocaleDateString(undefined, { dateStyle: 'long' });
+                } else if (type === 'monthly') {
+                    const year = document.getElementById('report-month-year').value;
+                    const month = document.getElementById('report-month').value;
+                    response = await api.reports.getMonthly(year, month);
+                    const monthName = document.getElementById('report-month').options[month - 1].text;
+                    periodLabel = `${monthName} ${year}`;
+                } else {
+                    const year = document.getElementById('report-year').value;
+                    response = await api.reports.getYearly(year);
+                    periodLabel = `Year ${year}`;
+                }
+
+                const data = response.data;
+                if (!data || (data.totalSalesRevenue === 0 && data.totalPurchaseCost === 0)) {
+                    document.getElementById('financial-results').style.display = 'none';
+                    document.getElementById('no-data').style.display = 'block';
+                    document.getElementById('financial-actions').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('no-data').style.display = 'none';
+                document.getElementById('financial-results').style.display = 'block';
+                document.getElementById('financial-actions').style.display = 'block';
+                lastGeneratedData = data;
+
+                document.getElementById('res-revenue').textContent = `NPR ${data.totalSalesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                document.getElementById('res-cost').textContent = `NPR ${data.totalPurchaseCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                
+                const profit = data.netProfit || (data.totalSalesRevenue - data.totalPurchaseCost);
+                const profitEl = document.getElementById('res-profit');
+                profitEl.textContent = `NPR ${profit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                profitEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                document.getElementById('res-sales-count').textContent = data.totalSalesInvoices || 0;
+
+                document.getElementById('res-period').textContent = periodLabel;
+                document.getElementById('res-gross').textContent = `NPR ${data.totalSalesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                document.getElementById('res-expenses').textContent = `NPR ${data.totalPurchaseCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                
+                const margin = data.totalSalesRevenue > 0 ? (profit / data.totalSalesRevenue * 100).toFixed(1) : 0;
+                document.getElementById('res-margin').textContent = `${margin}%`;
+
+                renderReportChart(data);
+                ui.showToast('Report generated successfully.');
+
+            } catch (err) {
+                console.error(err);
+                ui.showToast('Failed to generate report.', 'error');
+            }
+        }
+
+        function renderReportChart(data) {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Expenses', 'Profit'],
+                    datasets: [{
+                        label: 'Amount (NPR)',
+                        data: [
+                            data.totalSalesRevenue,
+                            data.totalPurchaseCost,
+                            data.netProfit || (data.totalSalesRevenue - data.totalPurchaseCost)
+                        ],
+                        backgroundColor: [
+                            'rgba(46, 213, 115, 0.7)',
+                            'rgba(235, 77, 75, 0.7)',
+                            'rgba(9, 132, 227, 0.7)'
+                        ],
+                        borderColor: ['#2ed573', '#eb4d4b', '#0984e3'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#a4b0be' } },
+                        x: { grid: { display: false }, ticks: { color: '#a4b0be' } }
+                    }
+                }
+            });
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            ui.setupStaffSidebar('financial-reports.html');
+            populateYears();
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('report-date').value = today;
+            document.getElementById('report-month').value = new Date().getMonth() + 1;
+
+            ui.refreshIcons();
+        });
+    </script>
+</body>
+
+</html>
