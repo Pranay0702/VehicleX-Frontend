@@ -773,13 +773,14 @@ textarea:focus {
         visibility: hidden;
     }
 
-    /* Only show the financial results container and its children */
-    #financial-results, #financial-results * {
+    /* Only show the financial results or loyalty results container and its children */
+    #financial-results, #financial-results *,
+    #loyalty-results, #loyalty-results * {
         visibility: visible;
     }
 
     /* Position the container at the top left of the printed page */
-    #financial-results {
+    #financial-results, #loyalty-results {
         position: absolute;
         left: 0;
         top: 0;
@@ -789,15 +790,33 @@ textarea:focus {
     }
 
     /* Remove backgrounds and borders for a cleaner print */
-    body, main, .card-elegant, .stat-card, #financial-results {
+    body, main, .card-elegant, .stat-card, #financial-results, #loyalty-results {
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
     }
 
     /* Ensure text is black for readability */
-    #financial-results * {
+    #financial-results *, #loyalty-results * {
         color: #000 !important;
+    }
+
+    /* For Loyalty Reports, show full table without scrolling */
+    #loyalty-results .card-elegant > div {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+    
+    #loyalty-results table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-bottom: 15px !important;
+    }
+
+    #loyalty-results th, #loyalty-results td {
+        border: 1px solid #ddd !important;
+        padding: 8px !important;
+        text-align: left !important;
     }
 
     /* Adjust the grid for print layout */
@@ -818,14 +837,16 @@ textarea:focus {
     }
 
     /* Adjust the main content grid */
-    #financial-results > div:nth-child(2) {
-        display: block !important; /* Stack chart and summary vertically */
+    #financial-results > div:nth-child(2),
+    #loyalty-results > div:first-child {
+        display: block !important; /* Stack vertically */
     }
 
     .card-elegant {
         margin-bottom: 20px !important;
         border: 1px solid #ccc !important;
         padding: 15px !important;
+        page-break-inside: avoid;
     }
 
     /* Ensure chart fits */

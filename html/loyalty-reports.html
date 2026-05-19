@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Loyalty Report | VehicleX</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="../index.html" style="display: block; width: 100%;">
+                <img src="../assets/logo.png" alt="Logo" style="height: 180px;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <!-- Dynamically populated -->
+        </ul>
+        <div class="sidebar-footer">
+            <!-- Dynamically populated -->
+        </div>
+    </nav>
+
+    <main>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                        Customer Insights</div>
+                    <h1>Customer Loyalty Report</h1>
+                </div>
+                <div>
+                    <div class="dropdown-container" id="export-dropdown" style="display: inline-block; margin-right: 10px;">
+                        <button class="btn btn-primary" onclick="toggleExportDropdown()">
+                            <i data-lucide="download" style="width: 14px;"></i> Export Report
+                            <i data-lucide="chevron-down" style="width: 14px; margin-left: 8px;"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" onclick="exportToExcel()">
+                                <i data-lucide="file-spreadsheet"></i> Download as Excel
+                            </button>
+                            <button class="dropdown-item" onclick="printReport()">
+                                <i data-lucide="printer"></i> Print Report
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadCustomerReports()">
+                        <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loyalty-results">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <!-- Regulars -->
+                <div class="card-elegant">
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 0.9rem; color: #fff;">Regular Customers</h3>
+                        <span class="status-pill success">Min 3 Purchases</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Orders</th>
+                                    <th>Total Spend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="regulars-body">
+                                <tr><td colspan="3" class="muted-empty">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- High Spenders -->
+                <div class="card-elegant">
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 0.9rem; color: #fff;">High Spenders</h3>
+                        <span class="status-pill warning">Min NPR 5,000</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Orders</th>
+                                    <th>Total Spend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="high-spenders-body">
+                                <tr><td colspan="3" class="muted-empty">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pending Credits -->
+                <div class="card-elegant">
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 0.9rem; color: #fff;">Pending Credits</h3>
+                        <span class="status-pill error">Unpaid Invoices</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Invoice #</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-credits-body">
+                                <tr><td colspan="3" class="muted-empty">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Overview -->
+            <div class="card-elegant" style="padding: 1.5rem;">
+                <h3 style="font-size: 1rem; margin-bottom: 1.5rem; color: #fff;">Customer Loyalty Overview</h3>
+                <div class="stats-grid" style="margin-bottom: 0;">
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Order Value</div>
+                        <div id="intel-avg-order" class="stat-value">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Loyalty Members</div>
+                        <div id="intel-loyalty" class="stat-value">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Repeat Customer Rate</div>
+                        <div id="intel-repeat" class="stat-value">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Customers</div>
+                        <div id="intel-total" class="stat-value">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let lastCustomerData = null;
+
+        function toggleExportDropdown() {
+            const dropdown = document.getElementById('export-dropdown');
+            dropdown.classList.toggle('open');
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('export-dropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        function exportToExcel() {
+            if (!lastCustomerData) return;
+
+            const wb = XLSX.utils.book_new();
+
+            // 1. Overview Sheet
+            const overviewData = [
+                ["VehicleX Customer Loyalty Report"],
+                [`Generated On: ${new Date().toLocaleString()}`],
+                [""],
+                ["Customer Loyalty Overview", ""],
+                ["Average Order Value", `NPR ${(lastCustomerData.intel.averageOrderValue || 0).toFixed(2)}`],
+                ["Total Loyalty Members", lastCustomerData.intel.totalLoyaltyMembers || 0],
+                ["Repeat Customer Rate", `${(lastCustomerData.intel.repeatCustomerRate || 0).toFixed(1)}%`],
+                ["Total Customers", lastCustomerData.intel.totalCustomerCount || 0]
+            ];
+            const overviewWs = XLSX.utils.aoa_to_sheet(overviewData);
+            overviewWs['!cols'] = [{ wch: 25 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, overviewWs, "Overview");
+
+            // 2. Regulars Sheet
+            const regularsData = [
+                ["Regular Customers (Min 3 Purchases)"],
+                [""],
+                ["Customer Name", "Order Count", "Total Spend (NPR)"]
+            ];
+            lastCustomerData.regulars.forEach(c => {
+                regularsData.push([c.customerName, c.orderCount, c.totalSpend]);
+            });
+            const regularsWs = XLSX.utils.aoa_to_sheet(regularsData);
+            regularsWs['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, regularsWs, "Regular Customers");
+
+            // 3. High Spenders Sheet
+            const highSpendersData = [
+                ["High Spenders (Min NPR 5,000)"],
+                [""],
+                ["Customer Name", "Order Count", "Total Spend (NPR)"]
+            ];
+            lastCustomerData.highSpenders.forEach(c => {
+                highSpendersData.push([c.customerName, c.orderCount, c.totalSpend]);
+            });
+            const highSpendersWs = XLSX.utils.aoa_to_sheet(highSpendersData);
+            highSpendersWs['!cols'] = [{ wch: 25 }, { wch: 15 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, highSpendersWs, "High Spenders");
+
+            // 4. Pending Credits Sheet
+            const creditsData = [
+                ["Pending Credits (Unpaid Invoices)"],
+                [""],
+                ["Customer Name", "Invoice Number", "Pending Amount (NPR)"]
+            ];
+            lastCustomerData.credits.forEach(c => {
+                creditsData.push([c.customerName, c.invoiceNumber, c.pendingAmount]);
+            });
+            const creditsWs = XLSX.utils.aoa_to_sheet(creditsData);
+            creditsWs['!cols'] = [{ wch: 25 }, { wch: 20 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, creditsWs, "Pending Credits");
+
+            XLSX.writeFile(wb, `VehicleX_Loyalty_Report_${new Date().getTime()}.xlsx`);
+            ui.showToast('Excel report downloaded.');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        async function loadCustomerReports() {
+            try {
+                const [regularsRes, highSpendersRes, creditsRes, intelRes] = await Promise.all([
+                    api.reports.getRegularCustomers(3),
+                    api.reports.getHighSpenders(5000),
+                    api.reports.getPendingCredits(),
+                    api.reports.getCustomerIntelligence()
+                ]);
+
+                // Render Regulars
+                const regBody = document.getElementById('regulars-body');
+                const regulars = regularsRes.data || [];
+                regBody.innerHTML = regulars.length ? regulars.map(c => `
+                    <tr>
+                        <td style="font-weight: 500;">${c.customerName}</td>
+                        <td class="mono">${c.orderCount}</td>
+                        <td class="mono">NPR ${c.totalSpend.toLocaleString()}</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="3" class="muted-empty">No regulars found</td></tr>';
+
+                // Render High Spenders
+                const highBody = document.getElementById('high-spenders-body');
+                const highSpenders = highSpendersRes.data || [];
+                highBody.innerHTML = highSpenders.length ? highSpenders.map(c => `
+                    <tr>
+                        <td style="font-weight: 500;">${c.customerName}</td>
+                        <td class="mono">${c.orderCount}</td>
+                        <td class="mono">NPR ${c.totalSpend.toLocaleString()}</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="3" class="muted-empty">No high spenders found</td></tr>';
+
+                // Render Pending Credits
+                const creditBody = document.getElementById('pending-credits-body');
+                const credits = creditsRes.data || [];
+                creditBody.innerHTML = credits.length ? credits.map(c => `
+                    <tr>
+                        <td style="font-weight: 500;">${c.customerName}</td>
+                        <td class="mono" style="color: var(--accent);">${c.invoiceNumber}</td>
+                        <td class="mono" style="color: var(--error);">NPR ${c.pendingAmount.toLocaleString()}</td>
+                    </tr>
+                `).join('') : '<tr><td colspan="3" class="muted-empty">No pending credits</td></tr>';
+
+                // Render Intelligence
+                const intel = intelRes.data || {};
+                
+                // Store data for export
+                lastCustomerData = {
+                    regulars: regulars,
+                    highSpenders: highSpenders,
+                    credits: credits,
+                    intel: intel
+                };
+
+                document.getElementById('intel-avg-order').textContent = `NPR ${(intel.averageOrderValue || 0).toLocaleString()}`;
+                document.getElementById('intel-loyalty').textContent = intel.totalLoyaltyMembers || 0;
+                document.getElementById('intel-repeat').textContent = `${(intel.repeatCustomerRate || 0).toFixed(1)}%`;
+                document.getElementById('intel-total').textContent = intel.totalCustomerCount || 0;
+
+            } catch (err) {
+                console.error(err);
+                ui.showToast('Failed to load customer insights.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!api.auth.requireStaff()) return;
+            ui.setupStaffSidebar('loyalty-reports.html');
+            loadCustomerReports();
+            ui.refreshIcons();
+        });
+    </script>
+</body>
+
+</html>
