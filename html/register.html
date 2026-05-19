@@ -35,11 +35,14 @@
     <div class="register-container">
         <div class="register-header">
             <img src="../assets/logo.png" alt="Logo" style="height: 120px; margin-bottom: 1rem;">
-            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Customer Portal</div>
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                Customer Portal</div>
             <h2>Self Registration</h2>
         </div>
         <form id="register-form">
-            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
                 Personal Profile Details
             </div>
             <div class="form-grid" style="margin-bottom: 1.5rem;">
@@ -49,7 +52,12 @@
                 </div>
                 <div class="form-group">
                     <label>Phone Number *</label>
-                    <input type="text" id="cust-phone" required placeholder="e.g. 9841234567">
+                    <div style="position: relative; width: 100%;">
+                        <span
+                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: 0.85rem; pointer-events: none; user-select: none;">+977</span>
+                        <input type="text" id="cust-phone" required placeholder="98XXXXXXXX"
+                            style="padding-left: 48px;">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Email Address *</label>
@@ -69,7 +77,8 @@
                 </div>
             </div>
 
-            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+            <div
+                style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
                 Vehicle Information
             </div>
             <div class="form-grid" style="margin-bottom: 2rem;">
@@ -100,10 +109,12 @@
                     Register & Create Account
                 </button>
                 <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">
-                    Already have an account? <a href="login.html" style="color: var(--accent); text-decoration: none;">Log in here</a>
+                    Already have an account? <a href="login.html"
+                        style="color: var(--accent); text-decoration: none;">Log in here</a>
                 </div>
                 <div style="text-align: center; font-size: 0.8rem; margin-top: 1rem;">
-                    <a href="../index.html" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <a href="../index.html"
+                        style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                         <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to Hub
                     </a>
                 </div>
@@ -123,9 +134,12 @@
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const phone = document.getElementById('cust-phone').value.trim();
+            let phone = document.getElementById('cust-phone').value.trim();
+            if (phone && !phone.startsWith('+977')) {
+                phone = '+977' + phone;
+            }
             if (!ui.validateNepalPhone(phone)) {
-                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                ui.showToast('Phone number must be a valid 10-digit Nepalese mobile number starting with 97 or 98 (e.g. 9841234567).', 'error');
                 return;
             }
 
@@ -140,7 +154,7 @@
             const yearVal = document.getElementById('veh-year').value;
             const data = {
                 fullName: document.getElementById('cust-name').value.trim(),
-                phoneNumber: document.getElementById('cust-phone').value.trim(),
+                phoneNumber: phone,
                 email: document.getElementById('cust-email').value.trim(),
                 password: password,
                 address: document.getElementById('cust-address').value.trim() || null,

@@ -122,7 +122,10 @@
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" id="staff-phone">
+                        <div style="position: relative; width: 100%;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: 0.85rem; pointer-events: none; user-select: none;">+977</span>
+                            <input type="text" id="staff-phone" placeholder="98XXXXXXXX" style="padding-left: 48px;">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Role</label>
@@ -271,7 +274,9 @@
                 document.getElementById('first-name').value = staff.firstName;
                 document.getElementById('last-name').value = staff.lastName;
                 document.getElementById('staff-email').value = staff.email;
-                document.getElementById('staff-phone').value = staff.phoneNumber || '';
+                let displayPhone = staff.phoneNumber || '';
+                if (displayPhone.startsWith('+977')) displayPhone = displayPhone.substring(4);
+                document.getElementById('staff-phone').value = displayPhone;
                 document.getElementById('staff-role').value = staff.roleName || staff.role;
                 document.getElementById('staff-active').value = String(staff.isActive);
                 document.getElementById('password-group').style.display = 'none';
@@ -305,9 +310,12 @@
         document.getElementById('staff-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const phone = document.getElementById('staff-phone').value.trim();
+            let phone = document.getElementById('staff-phone').value.trim();
+            if (phone && !phone.startsWith('+977')) {
+                phone = '+977' + phone;
+            }
             if (!ui.validateNepalPhone(phone, true)) {
-                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                ui.showToast('Phone number must be a valid 10-digit Nepalese mobile number starting with 97 or 98 (e.g. 9841234567).', 'error');
                 return;
             }
 
