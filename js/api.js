@@ -231,10 +231,10 @@ const api = {
         getMonthly: (year, month) => api.fetch(`/reports/financial/monthly?year=${year}&month=${month}`, {}, 'staff'),
         getYearly: (year) => api.fetch(`/reports/financial/yearly?year=${year}`, {}, 'staff'),
         getAnalysis: (from, to) => api.fetch(`/reports/financial/analysis?from=${from || ''}&to=${to || ''}`, {}, 'staff'),
-        getRegularCustomers: (minPurchases = 3) => api.fetch(`/reports/customers/regulars?minPurchases=${minPurchases}`, {}, 'staff'),
-        getHighSpenders: (minAmount = 5000) => api.fetch(`/reports/customers/high-spenders?minAmount=${minAmount}`, {}, 'staff'),
-        getPendingCredits: () => api.fetch('/reports/customers/pending-credits', {}, 'staff'),
-        getCustomerIntelligence: () => api.fetch('/reports/customers/intelligence', {}, 'staff'),
+        getRegularCustomers: (minPurchases = 3) => api.fetch(`/reports/customers/regulars?minPurchases=${minPurchases}`, {}, 'staff').catch(() => ({ data: [] })),
+        getHighSpenders: (minAmount = 5000) => api.fetch(`/reports/customers/high-spenders?minAmount=${minAmount}`, {}, 'staff').catch(() => ({ data: [] })),
+        getPendingCredits: () => api.fetch('/reports/customers/pending-credits', {}, 'staff').catch(() => ({ data: [] })),
+        getCustomerIntelligence: () => api.fetch('/reports/customers/intelligence', {}, 'staff').catch(() => ({ data: {} })),
     }
 };
 

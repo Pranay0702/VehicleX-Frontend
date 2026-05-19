@@ -768,76 +768,76 @@ textarea:focus {
 }
 
 @media print {
-    nav,
-    .header,
-    .toolbar,
-    .invoice-actions,
-    .subnav,
-    .card-elegant:has(.form-group),
-    #financial-actions,
-    #toast-container,
-    .sidebar-footer {
-        display: none !important;
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
     }
 
-    body {
-        background: #fff !important;
-        color: #000 !important;
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Only show the financial results container and its children */
+    #financial-results, #financial-results * {
+        visibility: visible;
     }
 
-    main {
-        margin: 0 !important;
-        padding: 20mm !important; /* Standard print margin */
-        width: 100% !important;
-        max-width: none !important;
-        display: block !important;
+    /* Position the container at the top left of the printed page */
+    #financial-results {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
     }
 
-    .stats-grid {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 10px !important;
-        background: none !important;
+    /* Remove backgrounds and borders for a cleaner print */
+    body, main, .card-elegant, .stat-card, #financial-results {
+        background: transparent !important;
+        box-shadow: none !important;
         border: none !important;
+    }
+
+    /* Ensure text is black for readability */
+    #financial-results * {
+        color: #000 !important;
+    }
+
+    /* Adjust the grid for print layout */
+    .stats-grid {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
         margin-bottom: 2rem !important;
     }
 
     .stat-card {
-        border: 1px solid #eee !important;
-        background: #fff !important;
-        padding: 1rem !important;
-        page-break-inside: avoid;
+        flex: 1 1 calc(25% - 10px) !important; /* 4 columns */
+        min-width: 150px !important;
+        border: 1px solid #ccc !important;
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Adjust the main content grid */
+    #financial-results > div:nth-child(2) {
+        display: block !important; /* Stack chart and summary vertically */
     }
 
     .card-elegant {
-        border: 1px solid #eee !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        margin-bottom: 1rem !important;
-        page-break-inside: avoid;
+        margin-bottom: 20px !important;
+        border: 1px solid #ccc !important;
+        padding: 15px !important;
     }
 
-    .tab-panel {
-        display: block !important;
-        opacity: 1 !important;
-    }
-
+    /* Ensure chart fits */
     canvas {
         max-width: 100% !important;
-        height: 300px !important; /* Fixed height for print */
+        height: auto !important;
+        max-height: 300px !important; /* Prevent chart from taking whole page */
     }
 
-    h1, h2, h3, .stat-value {
-        color: #000 !important;
-    }
-
-    .stat-label, .text-muted {
-        color: #666 !important;
+    /* Hide specific elements within the printable area if necessary */
+    #financial-actions {
+        display: none !important;
     }
 }
 

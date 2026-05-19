@@ -38,9 +38,6 @@
                             <i data-lucide="chevron-down" style="width: 14px; margin-left: 8px;"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <button class="dropdown-item" onclick="exportToPDF()">
-                                <i data-lucide="file-text"></i> Download as PDF
-                            </button>
                             <button class="dropdown-item" onclick="exportToExcel()">
                                 <i data-lucide="file-spreadsheet"></i> Download as Excel
                             </button>
@@ -187,28 +184,33 @@
             }
         });
 
-        function exportToPDF() {
-            // Browser print to PDF is the most reliable without heavy libraries
-            window.print();
-        }
-
         function exportToExcel() {
             if (!lastGeneratedData) return;
 
+            const reportPeriod = document.getElementById('res-period').textContent;
+            
+            // Format data professionally
             const data = [
-                ["Financial Report", document.getElementById('res-period').textContent],
-                ["", ""],
-                ["Metric", "Value"],
-                ["Total Sales Revenue", lastGeneratedData.totalSalesRevenue],
-                ["Total Purchase Cost", lastGeneratedData.totalPurchaseCost],
-                ["Net Profit/Loss", lastGeneratedData.netProfit || (lastGeneratedData.totalSalesRevenue - lastGeneratedData.totalPurchaseCost)],
-                ["Sales Invoices", lastGeneratedData.totalSalesInvoices || 0],
-                ["Profit Margin", document.getElementById('res-margin').textContent]
+                ["VehicleX Financial Report"],
+                [`Period: ${reportPeriod}`],
+                [""],
+                ["Financial Summary", ""],
+                ["Total Sales Revenue", `NPR ${lastGeneratedData.totalSalesRevenue.toFixed(2)}`],
+                ["Total Purchase Cost", `NPR ${lastGeneratedData.totalPurchaseCost.toFixed(2)}`],
+                ["Net Profit/Loss", `NPR ${(lastGeneratedData.netProfit || (lastGeneratedData.totalSalesRevenue - lastGeneratedData.totalPurchaseCost)).toFixed(2)}`],
+                ["Total Sales Invoices", lastGeneratedData.totalSalesInvoices || 0],
+                ["Profit Margin", document.getElementById('res-margin').textContent],
+                [""],
+                ["Generated On", new Date().toLocaleString()]
             ];
 
             const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Auto-size columns
+            ws['!cols'] = [{ wch: 25 }, { wch: 20 }];
+
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Financial Report");
+            XLSX.utils.book_append_sheet(wb, ws, "Financial Summary");
             XLSX.writeFile(wb, `VehicleX_Financial_Report_${new Date().getTime()}.xlsx`);
             ui.showToast('Excel report downloaded.');
         }
@@ -344,7 +346,10 @@
             populateYears();
             
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('report-date').value = today;
+            const dateInput = document.getElementById('report-date');
+            dateInput.value = today;
+            dateInput.max = today; // Restrict future dates
+            
             document.getElementById('report-month').value = new Date().getMonth() + 1;
 
             ui.refreshIcons();
