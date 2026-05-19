@@ -134,9 +134,9 @@ const api = {
     },
 
     serviceReviews: {
-        getAll: () => api.fetch('/service-reviews', {}, 'staff'),
-        getByCustomer: (customerId) => api.fetch(`/service-reviews/customer/${customerId}`, {}, 'staff'),
-        create: (data) => api.fetch('/service-reviews', { method: 'POST', body: JSON.stringify(data) }, 'staff'),
+        getAll: () => api.fetch('/service-reviews', {}, 'auto'),
+        getByCustomer: (customerId) => api.fetch(`/service-reviews/customer/${customerId}`, {}, 'auto'),
+        create: (data) => api.fetch('/service-reviews', { method: 'POST', body: JSON.stringify(data) }, 'auto'),
     },
 
     customerHistory: {
@@ -275,6 +275,135 @@ const ui = {
         }
     },
 
+    validateNepalPhone(phone, isOptional = false) {
+        if (isOptional && (!phone || phone.trim() === '')) {
+            return true;
+        }
+        const regex = /^\+977(97|98)\d{8}$/;
+        return regex.test(phone);
+    },
+
+    generateRestockPDF(p) {
+        try {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) {
+                console.error("jsPDF library is not loaded.");
+                this.showToast("PDF generation failed: jsPDF not loaded.", "error");
+                return;
+            }
+            const doc = new jsPDF();
+
+            // Colors: Deep dark gray (#121212) and bright gold (#ff9900)
+            const primaryColor = [18, 18, 18];
+            const goldColor = [255, 153, 0];
+            const grayColor = [100, 100, 100];
+
+            // Header Brand
+            doc.setTextColor(goldColor[0], goldColor[1], goldColor[2]);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(24);
+            doc.text("VEHICLEX", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+            doc.setFont("helvetica", "normal");
+            doc.text("Next-Gen Vehicle Parts & Service Management", 14, 25);
+
+            // Title
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("INBOUND RESTOCK INVOICE", 14, 40);
+
+            // Metadata
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text(`Invoice Number: ${p.invoiceNumber}`, 14, 50);
+            doc.text(`Invoice Date: ${new Date(p.purchaseDate).toLocaleDateString()}`, 14, 56);
+            if (p.notes) {
+                doc.text(`Internal Memo: ${p.notes}`, 14, 62);
+            }
+
+            // Draw horizontal separator line
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 68, 196, 68);
+
+            // Table Headers
+            let y = 78;
+            doc.setFont("helvetica", "bold");
+            doc.text("Item Name", 14, y);
+            doc.text("SKU", 85, y);
+            doc.text("Qty", 125, y);
+            doc.text("Unit Price (NPR)", 140, y);
+            doc.text("Total (NPR)", 170, y);
+
+            // Draw line under header
+            doc.line(14, y + 2, 196, y + 2);
+
+            // Table Rows
+            doc.setFont("helvetica", "normal");
+            y += 8;
+
+            const items = p.items || [];
+            items.forEach(item => {
+                // Truncate name if too long
+                let name = item.partName || "Unknown Part";
+                if (name.length > 32) name = name.substring(0, 30) + "...";
+
+                doc.text(name, 14, y);
+                doc.text(item.partNumber || "--", 85, y);
+                doc.text(String(item.quantity), 125, y);
+                doc.text(Number(item.unitPrice).toFixed(2), 140, y);
+                doc.text(Number(item.totalPrice).toFixed(2), 170, y);
+
+                y += 8;
+                // Check page overflow
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Item Name", 14, y);
+                    doc.text("SKU", 85, y);
+                    doc.text("Qty", 125, y);
+                    doc.text("Unit Price (NPR)", 140, y);
+                    doc.text("Total (NPR)", 170, y);
+                    doc.line(14, y + 2, 196, y + 2);
+                    doc.setFont("helvetica", "normal");
+                    y += 8;
+                }
+            });
+
+            // Final line
+            doc.line(14, y, 196, y);
+            y += 8;
+
+            // Grand Total
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("Grand Total (NPR):", 120, y);
+            doc.text(Number(p.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 }), 170, y);
+
+            // Footer / Authorized Signature
+            y += 25;
+            if (y > 270) {
+                doc.addPage();
+                y = 30;
+            }
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.line(14, y, 70, y);
+            doc.text("Authorized Signature", 14, y + 5);
+
+            // Save PDF
+            doc.save(`Invoice_${p.invoiceNumber}.pdf`);
+            this.showToast(`Invoice PDF generated successfully.`);
+        } catch (err) {
+            console.error("PDF Generation Error:", err);
+            this.showToast("PDF generation failed.", "error");
+        }
+    },
+
     showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -289,8 +418,14 @@ const ui = {
         container.appendChild(toast);
         this.refreshIcons();
 
+        // Trigger entry animation
         setTimeout(() => {
-            toast.style.transform = 'translateX(120%)';
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        }, 50);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(-120%)';
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 400);
         }, 4000);
@@ -323,8 +458,10 @@ const ui = {
             { href: 'parts.html', icon: 'package', label: 'Parts' },
             { href: 'customers.html', icon: 'user', label: 'Customers' },
             { href: 'customer-services.html', icon: 'calendar-check', label: 'Customer Services' },
-            { href: 'notifications.html', icon: 'bell', label: 'Notifications' },
-            {
+        ];
+        if (isAdmin) {
+            links.push({ href: 'notifications.html', icon: 'bell', label: 'Notifications' });
+            links.push({
                 label: 'Reports',
                 icon: 'file-text',
                 isDropdown: true,
@@ -332,8 +469,8 @@ const ui = {
                     { href: 'financial-reports.html', icon: 'bar-chart-3', label: 'Financial' },
                     { href: 'loyalty-reports.html', icon: 'award', label: 'Loyalty' },
                 ]
-            },
-        ];
+            });
+        }
         if (!isAdmin) {
             links.splice(2, 0, { href: 'sales.html', icon: 'receipt', label: 'Sales' });
         }
@@ -435,16 +572,5 @@ document.addEventListener('DOMContentLoaded', () => {
             logoLink.href = 'customer-dashboard.html';
         }
     }
-
-    // Intercept any "Exit Portal" links to go to the customer profile instead of landing page
-    const exitLinks = document.querySelectorAll('a[href="../index.html"]');
-    exitLinks.forEach(link => {
-        if (link.textContent.toLowerCase().includes('exit')) {
-            const customerToken = localStorage.getItem('customerToken');
-            if (customerToken) {
-                link.href = 'customer-dashboard.html';
-            }
-        }
-    });
 });
 

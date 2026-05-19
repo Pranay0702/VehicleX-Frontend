@@ -6,6 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .pulse-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--error);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 0 rgba(235, 77, 75, 0.7);
+            animation: pulse-red 1.5s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(235, 77, 75, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(235, 77, 75, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(235, 77, 75, 0);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -22,7 +52,6 @@
             <li><a href="customer-history.html"><i data-lucide="history"></i> My History</a></li>
             <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
             <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
-            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
         </ul>
         <div class="sidebar-footer">
             <div
@@ -83,29 +112,34 @@
 
         <div
             style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
-            Recent Service Activity</div>
+            Recent Activities</div>
         <div class="card-elegant" style="margin-bottom: 2rem;">
             <table>
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Service Type</th>
-                        <th>Vehicle</th>
+                        <th>Activity Type</th>
+                        <th>Description</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="recent-services-body">
                     <tr>
-                        <td colspan="4" class="muted-empty">Loading recent activity...</td>
+                        <td colspan="4" class="muted-empty">Loading recent activities...</td>
                     </tr>
                 </tbody>
             </table>
             <!-- Pagination Controls -->
-            <div id="pagination-controls" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
+            <div id="pagination-controls"
+                style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
                 <div id="pagination-info">Showing 0-0 of 0 activities</div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-secondary" id="btn-prev" onclick="prevPage()" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;"><i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> Prev</button>
-                    <button class="btn btn-secondary" id="btn-next" onclick="nextPage()" style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">Next <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></button>
+                    <button class="btn btn-secondary" id="btn-prev" onclick="prevPage()"
+                        style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;"><i
+                            data-lucide="chevron-left" style="width: 14px; height: 14px;"></i> Prev</button>
+                    <button class="btn btn-secondary" id="btn-next" onclick="nextPage()"
+                        style="padding: 6px 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">Next
+                        <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></button>
                 </div>
             </div>
         </div>
@@ -150,62 +184,58 @@
             }
         }
 
-        let services = [];
+        let activities = [];
         let currentPage = 1;
-        const pageSize = 5;
+        const pageSize = 10;
 
         function prevPage() {
             if (currentPage > 1) {
                 currentPage--;
-                renderServicesPage();
+                renderActivitiesPage();
             }
         }
 
         function nextPage() {
-            const maxPage = Math.ceil(services.length / pageSize);
+            const maxPage = Math.ceil(activities.length / pageSize);
             if (currentPage < maxPage) {
                 currentPage++;
-                renderServicesPage();
+                renderActivitiesPage();
             }
         }
 
-        function renderServicesPage() {
+        function renderActivitiesPage() {
             const tbody = document.getElementById('recent-services-body');
             tbody.innerHTML = '';
 
-            const total = services.length;
+            const total = activities.length;
             if (total === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="muted-empty">No recent services.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="muted-empty">No recent activities.</td></tr>';
                 document.getElementById('pagination-controls').style.display = 'none';
                 return;
             }
 
             document.getElementById('pagination-controls').style.display = 'flex';
             const maxPage = Math.ceil(total / pageSize);
-            
+
             if (currentPage < 1) currentPage = 1;
             if (currentPage > maxPage) currentPage = maxPage;
 
             const startIdx = (currentPage - 1) * pageSize;
             const endIdx = Math.min(startIdx + pageSize, total);
-            const pageData = services.slice(startIdx, endIdx);
+            const pageData = activities.slice(startIdx, endIdx);
 
-            pageData.forEach(srv => {
-                const status = srv.appointmentStatusName || 'Pending';
-                const statusColor = status === 'Pending' || status === 'Confirmed' ? 'var(--warning)' :
-                    status === 'Completed' ? 'var(--success)' : 'var(--error)';
-                
-                const dateStr = srv.appointmentDateUtc ? new Date(srv.appointmentDateUtc).toLocaleDateString() : 'Invalid Date';
-                const vehicleStr = srv.vehicleMake && srv.vehicleModel ? `${srv.vehicleMake} ${srv.vehicleModel} (${srv.vehicleRegistrationNumber || ''})` : '--';
+            pageData.forEach(act => {
+                const dateStr = act.date ? new Date(act.date).toLocaleDateString() : 'Invalid Date';
+                const alertDot = act.isPending ? '<span class="pulse-dot" title="Action Required"></span>' : '';
 
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td class="mono">${dateStr}</td>
-                        <td style="font-weight: 500;">${srv.serviceType}</td>
-                        <td>${vehicleStr}</td>
+                        <td style="font-weight: 500; display: flex; align-items: center;">${alertDot}${act.title}</td>
+                        <td style="color: var(--text-muted);">${act.description}</td>
                         <td>
-                            <span style="font-size: 0.65rem; font-weight: 700; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 2px 6px; text-transform: uppercase;">
-                                ${status}
+                            <span style="font-size: 0.65rem; font-weight: 700; color: ${act.statusColor}; border: 1px solid ${act.statusColor}; padding: 2px 6px; text-transform: uppercase; white-space: nowrap;">
+                                ${act.status}
                             </span>
                         </td>
                     </tr>
@@ -228,7 +258,7 @@
                 ]);
 
                 const vehicles = vRes.data || vRes || [];
-                services = sRes.data || sRes || [];
+                const services = sRes.data || sRes || [];
                 const purchases = pRes.data || pRes || [];
 
                 document.getElementById('stat-vehicles').textContent = vehicles.length;
@@ -239,9 +269,50 @@
                 const totalSpent = purchases.reduce((acc, pur) => acc + (pur.totalAmount || 0), 0);
                 document.getElementById('stat-spent').textContent = `NPR ${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
+                // Map services to activities
+                const serviceActivities = services.map(srv => {
+                    const isPending = srv.appointmentStatusName === 'Pending';
+                    return {
+                        date: srv.appointmentDateUtc,
+                        type: 'Service',
+                        title: `Service: ${srv.serviceType}`,
+                        description: srv.vehicleMake && srv.vehicleModel ? `${srv.vehicleMake} ${srv.vehicleModel} (${srv.vehicleRegistrationNumber || ''})` : 'Vehicle N/A',
+                        status: srv.appointmentStatusName || 'Pending',
+                        statusColor: (srv.appointmentStatusName === 'Pending' || srv.appointmentStatusName === 'Confirmed') ? 'var(--warning)' :
+                            srv.appointmentStatusName === 'Completed' ? 'var(--success)' : 'var(--error)',
+                        isPending: isPending
+                    };
+                });
+
+                // Map purchases to activities
+                const purchaseActivities = purchases.map(pur => {
+                    const items = pur.items || [];
+                    const itemsStr = items.length > 0
+                        ? items.map(i => `${i.quantity}x ${i.partName || 'Part'}`).join(', ')
+                        : 'Parts';
+                    const isPending = pur.statusName === 'Unpaid';
+                    return {
+                        date: pur.purchaseDateUtc,
+                        type: 'Purchase',
+                        title: 'Part Purchase',
+                        description: `${pur.invoiceNumber} (${itemsStr}) - NPR ${Number(pur.totalAmount).toFixed(2)}`,
+                        status: pur.statusName || 'Paid',
+                        statusColor: pur.statusName === 'Unpaid' ? 'var(--error)' : 'var(--success)',
+                        isPending: isPending
+                    };
+                });
+
+                // Combine and sort: pending first, then by date descending
+                activities = [...serviceActivities, ...purchaseActivities].sort((a, b) => {
+                    if (a.isPending && !b.isPending) return -1;
+                    if (!a.isPending && b.isPending) return 1;
+                    return new Date(b.date) - new Date(a.date);
+                });
+
                 currentPage = 1;
-                renderServicesPage();
+                renderActivitiesPage();
             } catch (err) {
+                console.error(err);
                 ui.showToast('Failed to load dashboard data.', 'error');
             }
         }

@@ -24,10 +24,20 @@
     </nav>
 
     <main>
+        <!-- Print Only Header -->
+        <div class="print-only" style="margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem; width: 100%;">
+            <h1 style="color: #000; font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">VehicleX Financial Report</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #555; font-size: 0.9rem;">
+                <div>Period: <span id="print-res-period" style="font-weight: bold; color: #000;">--</span></div>
+                <div>Generated: <span id="print-res-date" style="font-weight: bold; color: #000;">--</span></div>
+            </div>
+        </div>
+
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
+                    <div
+                        style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">
                         Financial Analytics</div>
                     <h1>Financial Reports</h1>
                 </div>
@@ -50,8 +60,9 @@
             </div>
         </div>
 
-        <div class="card-elegant" style="padding: 1.5rem; margin-bottom: 2rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: flex-end;">
+        <div class="card-elegant no-print" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: flex-end;">
                 <div class="form-group">
                     <label>Report Type</label>
                     <select id="report-type" class="form-control" onchange="toggleInputs()">
@@ -123,7 +134,8 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
                 <div class="card-elegant" style="padding: 1.5rem;">
                     <h3 style="font-size: 1rem; margin-bottom: 1.5rem; color: #fff;">Financial Breakdown</h3>
                     <div style="height: 300px;">
@@ -133,19 +145,23 @@
                 <div class="card-elegant" style="padding: 1.5rem;">
                     <h3 style="font-size: 1rem; margin-bottom: 1.5rem; color: #fff;">Summary Details</h3>
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        <div
+                            style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-muted);">Report Period</span>
                             <span id="res-period" style="font-weight: 500;">--</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        <div
+                            style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-muted);">Gross Revenue</span>
                             <span id="res-gross" class="mono">NPR 0.00</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        <div
+                            style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-muted);">Total Expenses</span>
                             <span id="res-expenses" class="mono">NPR 0.00</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        <div
+                            style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-muted);">Profit Margin</span>
                             <span id="res-margin" class="mono">0%</span>
                         </div>
@@ -157,7 +173,8 @@
         <div id="no-data" style="display: none; text-align: center; padding: 5rem 2rem;">
             <i data-lucide="file-x" style="width: 48px; height: 48px; color: var(--text-dim); margin-bottom: 1rem;"></i>
             <h3 style="color: var(--text-muted);">No financial data found for this period</h3>
-            <p style="color: var(--text-dim); font-size: 0.9rem;">Try selecting a different date range or report type.</p>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">Try selecting a different date range or report type.
+            </p>
         </div>
     </main>
 
@@ -188,7 +205,7 @@
             if (!lastGeneratedData) return;
 
             const reportPeriod = document.getElementById('res-period').textContent;
-            
+
             // Format data professionally
             const data = [
                 ["VehicleX Financial Report"],
@@ -205,7 +222,7 @@
             ];
 
             const ws = XLSX.utils.aoa_to_sheet(data);
-            
+
             // Auto-size columns
             ws['!cols'] = [{ wch: 25 }, { wch: 20 }];
 
@@ -275,7 +292,7 @@
 
                 document.getElementById('res-revenue').textContent = `NPR ${data.totalSalesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
                 document.getElementById('res-cost').textContent = `NPR ${data.totalPurchaseCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-                
+
                 const profit = data.netProfit || (data.totalSalesRevenue - data.totalPurchaseCost);
                 const profitEl = document.getElementById('res-profit');
                 profitEl.textContent = `NPR ${profit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
@@ -284,9 +301,11 @@
                 document.getElementById('res-sales-count').textContent = data.totalSalesInvoices || 0;
 
                 document.getElementById('res-period').textContent = periodLabel;
+                document.getElementById('print-res-period').textContent = periodLabel;
+                document.getElementById('print-res-date').textContent = new Date().toLocaleString();
                 document.getElementById('res-gross').textContent = `NPR ${data.totalSalesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
                 document.getElementById('res-expenses').textContent = `NPR ${data.totalPurchaseCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-                
+
                 const margin = data.totalSalesRevenue > 0 ? (profit / data.totalSalesRevenue * 100).toFixed(1) : 0;
                 document.getElementById('res-margin').textContent = `${margin}%`;
 
@@ -341,15 +360,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!api.auth.requireStaff()) return;
+            if (!api.auth.requireAdmin()) return;
             ui.setupStaffSidebar('financial-reports.html');
             populateYears();
-            
+
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('report-date');
             dateInput.value = today;
             dateInput.max = today; // Restrict future dates
-            
+
             document.getElementById('report-month').value = new Date().getMonth() + 1;
 
             ui.refreshIcons();

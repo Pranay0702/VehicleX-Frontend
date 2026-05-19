@@ -21,7 +21,6 @@
             <li><a href="customer-history.html"><i data-lucide="history"></i> My History</a></li>
             <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
             <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
-            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
         </ul>
         <div class="sidebar-footer">
             <div
@@ -111,6 +110,29 @@
                 </tbody>
             </table>
         </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; margin-top: 2.5rem;">
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+                My Service Reviews</div>
+        </div>
+        <div class="card-elegant" style="margin-bottom: 2.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Rating</th>
+                        <th>Service / Appointment</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody id="reviews-body">
+                    <tr>
+                        <td colspan="4" class="muted-empty">Loading reviews...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Vehicle Modal -->
@@ -162,6 +184,8 @@
     <script src="../js/api.js"></script>
     <script>
         let vehicles = [];
+        let customerId = null;
+        let reviews = [];
 
         function logoutCustomer() {
             api.customers.logout();
@@ -173,6 +197,7 @@
                 // Fetch profile
                 const response = await api.customers.getProfile();
                 const data = response.data || response;
+                customerId = data.id;
 
                 document.getElementById('prof-name').value = data.fullName || '';
                 document.getElementById('prof-phone').value = data.phoneNumber || '';
@@ -186,6 +211,10 @@
                 const nameParts = (data.fullName || '').split(' ');
                 const initials = nameParts.map(p => p[0]).join('').substring(0, 2).toUpperCase() || 'CU';
                 document.getElementById('avatar-initials').textContent = initials;
+
+                if (customerId) {
+                    loadReviews();
+                }
             } catch (err) {
                 if (err.message && err.message.toLowerCase().includes('unauthorized')) {
                     ui.showToast('Session expired or unauthorized. Logging out...', 'error');
@@ -194,6 +223,65 @@
                     ui.showToast(err.message || 'Failed to load profile.', 'error');
                 }
             }
+        }
+
+        async function loadReviews() {
+            try {
+                const response = await api.serviceReviews.getByCustomer(customerId);
+                reviews = response.data || response || [];
+
+                // Also fetch services to map appointments to service types
+                let services = [];
+                try {
+                    const servicesRes = await api.portal.getServices();
+                    services = servicesRes.data || servicesRes || [];
+                } catch (e) {
+                    console.error("Failed to fetch services for mapping:", e);
+                }
+
+                const serviceMap = {};
+                services.forEach(s => {
+                    serviceMap[s.id] = s.serviceType;
+                });
+
+                renderReviews(serviceMap);
+            } catch (err) {
+                console.error("Failed to load reviews:", err);
+                const tbody = document.getElementById('reviews-body');
+                tbody.innerHTML = '<tr><td colspan="4" class="muted-empty">Failed to load reviews.</td></tr>';
+            }
+        }
+
+        function renderReviews(serviceMap) {
+            const tbody = document.getElementById('reviews-body');
+            tbody.innerHTML = '';
+
+            if (reviews.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="muted-empty">No reviews submitted yet.</td></tr>';
+                return;
+            }
+
+            const map = { 'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1 };
+
+            reviews.forEach(rev => {
+                const dateStr = rev.createdAtUtc ? new Date(rev.createdAtUtc).toLocaleDateString() : 'N/A';
+                const ratingValue = rev.ratingName || rev.rating;
+                const num = (typeof ratingValue === 'string') ? (map[ratingValue.toLowerCase()] || 5) : (ratingValue || 5);
+                const stars = '★'.repeat(num) + '☆'.repeat(5 - num);
+                const serviceType = rev.appointmentId ? (serviceMap[rev.appointmentId] || `Appointment #${rev.appointmentId}`) : 'General Feedback';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="mono">${dateStr}</td>
+                        <td>
+                            <span style="color: #f39c12; font-size: 0.95rem; font-weight: bold; letter-spacing: 1px;">${stars}</span>
+                            <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 4px; text-transform: uppercase;">(${rev.ratingName || rev.rating})</span>
+                        </td>
+                        <td style="font-weight: 500;">${serviceType}</td>
+                        <td style="color: var(--text-dim); max-width: 300px; word-wrap: break-word;">${rev.comment || '<i>No comment left.</i>'}</td>
+                    </tr>
+                `);
+            });
         }
 
         async function loadVehicles() {
@@ -277,9 +365,15 @@
         document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const phone = document.getElementById('prof-phone').value.trim();
+            if (!ui.validateNepalPhone(phone)) {
+                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                return;
+            }
+
             const data = {
                 fullName: document.getElementById('prof-name').value.trim(),
-                phoneNumber: document.getElementById('prof-phone').value.trim(),
+                phoneNumber: phone,
                 email: document.getElementById('prof-email').value.trim(),
                 address: document.getElementById('prof-address').value.trim() || null
             };

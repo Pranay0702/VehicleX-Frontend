@@ -21,7 +21,6 @@
             <li><a href="customer-history.html" class="active"><i data-lucide="history"></i> My History</a></li>
             <li><a href="customer-requests.html"><i data-lucide="calendar-check"></i> Service Center</a></li>
             <li><a href="customer-parts.html"><i data-lucide="package"></i> Buy Parts</a></li>
-            <li><a href="../index.html"><i data-lucide="home"></i> Exit Portal</a></li>
         </ul>
         <div class="sidebar-footer">
             <div
@@ -78,11 +77,15 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
-                <div style="font-size: 0.8rem; color: var(--text-muted);" id="services-page-info">Showing 0 entries</div>
+            <div class="pagination-controls"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="services-page-info">Showing 0 entries
+                </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" id="btn-services-prev" onclick="changeServicesPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
-                    <button class="btn btn-secondary" id="btn-services-next" onclick="changeServicesPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                    <button class="btn btn-secondary" id="btn-services-prev" onclick="changeServicesPage(-1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-services-next" onclick="changeServicesPage(1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
                 </div>
             </div>
         </div>
@@ -107,11 +110,15 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
-                <div style="font-size: 0.8rem; color: var(--text-muted);" id="purchases-page-info">Showing 0 entries</div>
+            <div class="pagination-controls"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="purchases-page-info">Showing 0 entries
+                </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" id="btn-purchases-prev" onclick="changePurchasesPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
-                    <button class="btn btn-secondary" id="btn-purchases-next" onclick="changePurchasesPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                    <button class="btn btn-secondary" id="btn-purchases-prev" onclick="changePurchasesPage(-1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-purchases-next" onclick="changePurchasesPage(1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
                 </div>
             </div>
         </div>
@@ -137,11 +144,15 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
-                <div style="font-size: 0.8rem; color: var(--text-muted);" id="requests-page-info">Showing 0 entries</div>
+            <div class="pagination-controls"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="requests-page-info">Showing 0 entries
+                </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-secondary" id="btn-requests-prev" onclick="changeRequestsPage(-1)" style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
-                    <button class="btn btn-secondary" id="btn-requests-next" onclick="changeRequestsPage(1)" style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
+                    <button class="btn btn-secondary" id="btn-requests-prev" onclick="changeRequestsPage(-1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Previous</button>
+                    <button class="btn btn-secondary" id="btn-requests-next" onclick="changeRequestsPage(1)"
+                        style="padding: 4px 10px; font-size: 0.8rem;">Next</button>
                 </div>
             </div>
         </div>
@@ -155,13 +166,13 @@
         let customerId = null;
         let servicesData = [];
         let servicesPage = 1;
-        
+
         let purchasesData = [];
         let purchasesPage = 1;
-        
+
         let requestsData = [];
         let requestsPage = 1;
-        
+
         const ITEMS_PER_PAGE = 2;
 
         function updatePaginationControls(type, totalItems, currentPage) {
@@ -171,14 +182,14 @@
 
             const infoEl = document.getElementById(`${type}-page-info`);
             if (infoEl) {
-                infoEl.textContent = totalItems === 0 
-                    ? 'Showing 0 entries' 
+                infoEl.textContent = totalItems === 0
+                    ? 'Showing 0 entries'
                     : `Showing ${startIdx + 1} to ${Math.min(endIdx, totalItems)} of ${totalItems} entries`;
             }
-            
+
             const btnPrev = document.getElementById(`btn-${type}-prev`);
             const btnNext = document.getElementById(`btn-${type}-next`);
-            
+
             if (btnPrev && btnNext) {
                 btnPrev.disabled = currentPage === 1;
                 btnNext.disabled = currentPage === totalPages || totalPages === 0;
@@ -222,6 +233,22 @@
             try {
                 const res = await api.portal.getServices();
                 servicesData = res.data || res || [];
+                servicesData.sort((a, b) => {
+                    const getStatusOrder = (status) => {
+                        const s = String(status).toUpperCase();
+                        if (s === 'PENDING' || s === '1') return 1;
+                        if (s === 'CONFIRMED' || s === '2') return 2;
+                        if (s === 'COMPLETED' || s === '3') return 3;
+                        if (s === 'CANCELLED' || s === '4') return 4;
+                        return 5;
+                    };
+                    const orderA = getStatusOrder(a.appointmentStatusName || a.status);
+                    const orderB = getStatusOrder(b.appointmentStatusName || b.status);
+                    if (orderA !== orderB) {
+                        return orderA - orderB;
+                    }
+                    return new Date(b.appointmentDateUtc) - new Date(a.appointmentDateUtc);
+                });
                 servicesPage = 1;
                 renderServices();
             } catch (err) {
@@ -246,7 +273,7 @@
             const tbody = document.getElementById('services-body');
             const startIdx = (servicesPage - 1) * ITEMS_PER_PAGE;
             const paginatedData = servicesData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-            
+
             tbody.innerHTML = '';
             if (servicesData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="muted-empty">No service history found.</td></tr>';
@@ -257,10 +284,22 @@
                         statusName === 'Completed' ? 'var(--success)' : 'var(--error)';
                     const vehicleInfo = [srv.vehicleMake, srv.vehicleModel, srv.vehicleRegistrationNumber]
                         .filter(Boolean).join(' ') || '--';
+
+                    const status = String(statusName).toUpperCase();
+                    let alertDotHtml = '';
+                    if (status === 'PENDING' || status === '1') {
+                        alertDotHtml = '<span class="pulse-dot pending" title="Pending Action"></span>';
+                    } else if (status === 'CONFIRMED' || status === '2') {
+                        alertDotHtml = '<span class="pulse-dot confirmed" title="Confirmed Action"></span>';
+                    }
+
                     tbody.insertAdjacentHTML('beforeend', `
                         <tr>
                             <td class="mono">${new Date(srv.appointmentDateUtc).toLocaleString()}</td>
-                            <td style="font-weight: 500;">${srv.serviceType}</td>
+                            <td style="font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                                ${alertDotHtml}
+                                <span>${srv.serviceType}</span>
+                            </td>
                             <td>${vehicleInfo}</td>
                             <td>
                                 <span style="font-size: 0.65rem; font-weight: 700; color: ${statusColor}; border: 1px solid ${statusColor}; padding: 2px 6px; text-transform: uppercase;">
@@ -303,7 +342,7 @@
             const tbody = document.getElementById('purchases-body');
             const startIdx = (purchasesPage - 1) * ITEMS_PER_PAGE;
             const paginatedData = purchasesData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-            
+
             tbody.innerHTML = '';
             if (purchasesData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="muted-empty">No purchase history found.</td></tr>';
@@ -332,6 +371,22 @@
             try {
                 const res = await api.portal.getPartRequests(customerId);
                 requestsData = res.data || res || [];
+                requestsData.sort((a, b) => {
+                    const getStatusOrder = (status) => {
+                        const s = String(status).toUpperCase();
+                        if (s === 'PENDING' || s === '1') return 1;
+                        if (s === 'SOURCING' || s === '2') return 2;
+                        if (s === 'AVAILABLE' || s === '3') return 3;
+                        if (s === 'CLOSED' || s === '4') return 4;
+                        return 5;
+                    };
+                    const orderA = getStatusOrder(a.statusName || a.status);
+                    const orderB = getStatusOrder(b.statusName || b.status);
+                    if (orderA !== orderB) {
+                        return orderA - orderB;
+                    }
+                    return new Date(b.createdAtUtc || b.createdDateUtc || 0) - new Date(a.createdAtUtc || a.createdDateUtc || 0);
+                });
                 requestsPage = 1;
                 renderRequests();
             } catch (err) {
@@ -356,7 +411,7 @@
             const tbody = document.getElementById('requests-body');
             const startIdx = (requestsPage - 1) * ITEMS_PER_PAGE;
             const paginatedData = requestsData.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-            
+
             tbody.innerHTML = '';
             if (requestsData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="muted-empty">No part requests found.</td></tr>';
@@ -367,9 +422,20 @@
                         (statusName === 'Available' || statusName === 'Closed') ? 'var(--success)' : 'var(--accent)';
                     const vehicleInfo = [req.vehicleMake, req.vehicleModel].filter(Boolean).join(' ') || '--';
 
+                    const status = String(statusName).toUpperCase();
+                    let alertDotHtml = '';
+                    if (status === 'PENDING' || status === '1') {
+                        alertDotHtml = '<span class="pulse-dot pending" title="Pending Action"></span>';
+                    } else if (status === 'SOURCING' || status === '2') {
+                        alertDotHtml = '<span class="pulse-dot confirmed" title="Sourcing Part"></span>';
+                    }
+
                     tbody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td style="font-weight: 600; color: #fff;">${req.partName}</td>
+                            <td style="font-weight: 600; color: #fff; display: flex; align-items: center; gap: 4px;">
+                                ${alertDotHtml}
+                                <span>${req.partName}</span>
+                            </td>
                             <td class="mono" style="color: var(--text-muted);">${req.partNumber || '--'}</td>
                             <td>${vehicleInfo}</td>
                             <td class="mono">${req.quantity}</td>

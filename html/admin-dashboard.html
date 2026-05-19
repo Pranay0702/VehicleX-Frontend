@@ -117,6 +117,10 @@
                 <div id="stat-customers" class="stat-value">--</div>
             </div>
             <div class="stat-card">
+                <div class="stat-label">Overall Review Rating</div>
+                <div id="stat-rating" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-label">Inventory Value</div>
                 <div id="stat-value" class="stat-value">--</div>
             </div>
@@ -314,14 +318,15 @@
                 const year = now.getFullYear();
                 const month = now.getMonth() + 1;
 
-                const [vResponse, pResponse, purResponse, reqResponse, custResponse, reportResponse, creditsResponse] = await Promise.all([
+                const [vResponse, pResponse, purResponse, reqResponse, custResponse, reportResponse, creditsResponse, reviewResponse] = await Promise.all([
                     api.vendors.getAll(),
                     api.parts.getAll(),
                     api.restocks.getAll(),
                     api.unavailablePartRequests.getAll(),
                     api.customers.getAll(),
                     api.reports.getMonthly(year, month).catch(() => ({ data: null })),
-                    api.reports.getPendingCredits().catch(() => ({ data: [] }))
+                    api.reports.getPendingCredits().catch(() => ({ data: [] })),
+                    api.serviceReviews.getAll().catch(() => ({ data: [] }))
                 ]);
 
                 const vendors = vResponse.data || [];
@@ -330,6 +335,7 @@
                 const partRequests = reqResponse.data || [];
                 const customers = custResponse.data || [];
                 const credits = creditsResponse.data || [];
+                const reviews = reviewResponse.data || [];
                 const currentReport = reportResponse.data || {
                     totalSalesRevenue: 0,
                     totalPurchaseCost: 0,
@@ -343,6 +349,29 @@
                 document.getElementById('stat-purchases').textContent = purchases.length;
                 document.getElementById('stat-part-reqs').textContent = partRequests.filter(r => (r.statusName || r.status) === 'Pending').length;
                 document.getElementById('stat-customers').textContent = customers.length;
+
+                // Calculate overall review rating
+                let totalRating = 0;
+                let ratingCount = 0;
+                const ratingMap = { 'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1 };
+                
+                reviews.forEach(r => {
+                    const ratingStrOrNum = r.ratingName || r.rating;
+                    let val = 0;
+                    if (typeof ratingStrOrNum === 'number') {
+                        val = ratingStrOrNum;
+                    } else if (typeof ratingStrOrNum === 'string') {
+                        val = ratingMap[ratingStrOrNum.toLowerCase()] || parseInt(ratingStrOrNum) || 0;
+                    }
+                    if (val >= 1 && val <= 5) {
+                        totalRating += val;
+                        ratingCount++;
+                    }
+                });
+                
+                const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 'No Ratings';
+                const ratingDisplay = ratingCount > 0 ? `${avgRating} ★ (${ratingCount})` : 'No Ratings';
+                document.getElementById('stat-rating').textContent = ratingDisplay;
 
                 const val = parts.reduce((acc, p) => acc + (p.price * p.stockQuantity), 0);
                 document.getElementById('stat-value').textContent = `NPR ${val.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;

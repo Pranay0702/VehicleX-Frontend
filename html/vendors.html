@@ -196,12 +196,19 @@
 
         document.getElementById('vendor-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const phone = document.getElementById('phone').value.trim();
+            if (!ui.validateNepalPhone(phone)) {
+                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                return;
+            }
+
             const id = document.getElementById('vendor-id').value;
             const data = {
                 name: document.getElementById('name').value,
                 contactPerson: document.getElementById('contact').value,
                 email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
+                phone: phone,
                 address: document.getElementById('address').value
             };
 

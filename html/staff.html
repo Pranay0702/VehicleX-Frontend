@@ -304,12 +304,19 @@
 
         document.getElementById('staff-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const phone = document.getElementById('staff-phone').value.trim();
+            if (!ui.validateNepalPhone(phone, true)) {
+                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                return;
+            }
+
             const id = document.getElementById('staff-id').value;
             const data = {
                 firstName: document.getElementById('first-name').value,
                 lastName: document.getElementById('last-name').value,
                 email: document.getElementById('staff-email').value,
-                phoneNumber: document.getElementById('staff-phone').value || null,
+                phoneNumber: phone || null,
                 role: document.getElementById('staff-role').value
             };
 

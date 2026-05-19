@@ -611,10 +611,17 @@
         // Register form submit handler
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const phone = document.getElementById('cust-phone').value.trim();
+            if (!ui.validateNepalPhone(phone)) {
+                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                return;
+            }
+
             const yearVal = document.getElementById('veh-year').value;
             const data = {
                 fullName: document.getElementById('cust-name').value.trim(),
-                phoneNumber: document.getElementById('cust-phone').value.trim(),
+                phoneNumber: phone,
                 email: document.getElementById('cust-email').value.trim(),
                 address: document.getElementById('cust-address').value.trim() || null,
                 vehicle: {
@@ -799,6 +806,12 @@
         }
 
         function switchTab(tabId) {
+            const loggedIn = api.staff.getLoggedInUser();
+            const isAdmin = loggedIn && loggedIn.role === 'Admin';
+            if (isAdmin && tabId === 'directory') {
+                tabId = 'workspace';
+            }
+
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
                 btn.style.color = 'var(--text-muted)';
@@ -827,8 +840,23 @@
             ui.setupStaffSidebar('customers.html');
             ui.refreshIcons();
 
-            // Default to Directory tab and fetch customers
-            switchTab('directory');
+            const loggedIn = api.staff.getLoggedInUser();
+            const isAdmin = loggedIn && loggedIn.role === 'Admin';
+
+            if (isAdmin) {
+                // Hide directory tab for Admin
+                const tabDir = document.getElementById('tab-directory');
+                if (tabDir) tabDir.style.display = 'none';
+
+                // Default to Workspace tab for Admin
+                switchTab('workspace');
+
+                // Fetch directory to populate dropdown/data but don't show the directory section
+                fetchDirectory();
+            } else {
+                // Default to Directory tab and fetch customers for staff
+                switchTab('directory');
+            }
             clearWorkspace();
         });
     </script>

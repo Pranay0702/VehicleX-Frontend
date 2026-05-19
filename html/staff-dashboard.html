@@ -52,6 +52,10 @@
                 <div id="stat-appointments" class="stat-value">--</div>
             </div>
             <div class="stat-card">
+                <div class="stat-label">Overall Review Rating</div>
+                <div id="stat-rating" class="stat-value">--</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-label">Inventory Value</div>
                 <div id="stat-value" class="stat-value">--</div>
             </div>
@@ -124,15 +128,17 @@
                 const year = now.getFullYear();
                 const month = now.getMonth() + 1;
 
-                const [pResponse, cResponse, apptResponse, reportResponse] = await Promise.all([
+                const [pResponse, cResponse, apptResponse, reportResponse, reviewResponse] = await Promise.all([
                     api.parts.getAll(),
                     api.customers.getAll(),
                     api.appointments.getAll(),
-                    api.reports.getMonthly(year, month).catch(() => ({ data: null }))
+                    api.reports.getMonthly(year, month).catch(() => ({ data: null })),
+                    api.serviceReviews.getAll().catch(() => ({ data: [] }))
                 ]);
                 const parts = pResponse.data || [];
                 const customers = cResponse.data || [];
                 const appointments = apptResponse.data || [];
+                const reviews = reviewResponse.data || [];
                 const currentReport = reportResponse.data || {
                     totalSalesRevenue: 0,
                     totalPurchaseCost: 0,
@@ -145,6 +151,29 @@
                 document.getElementById('stat-low-stock').textContent = parts.filter(p => p.stockQuantity < 10).length;
                 document.getElementById('stat-customers').textContent = customers.length;
                 document.getElementById('stat-appointments').textContent = appointments.filter(a => (a.statusName || a.status) === 'Pending').length;
+
+                // Calculate overall review rating
+                let totalRating = 0;
+                let ratingCount = 0;
+                const ratingMap = { 'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1 };
+                
+                reviews.forEach(r => {
+                    const ratingStrOrNum = r.ratingName || r.rating;
+                    let val = 0;
+                    if (typeof ratingStrOrNum === 'number') {
+                        val = ratingStrOrNum;
+                    } else if (typeof ratingStrOrNum === 'string') {
+                        val = ratingMap[ratingStrOrNum.toLowerCase()] || parseInt(ratingStrOrNum) || 0;
+                    }
+                    if (val >= 1 && val <= 5) {
+                        totalRating += val;
+                        ratingCount++;
+                    }
+                });
+                
+                const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 'No Ratings';
+                const ratingDisplay = ratingCount > 0 ? `${avgRating} ★ (${ratingCount})` : 'No Ratings';
+                document.getElementById('stat-rating').textContent = ratingDisplay;
 
                 const val = parts.reduce((acc, p) => acc + (p.price * p.stockQuantity), 0);
                 document.getElementById('stat-value').textContent = `NPR ${val.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parts | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -249,8 +250,31 @@
                     await api.parts.update(id, data);
                     ui.showToast('Records updated.');
                 } else {
-                    await api.parts.create(data);
-                    ui.showToast('Entry logged.');
+                    const initialStock = data.stockQuantity;
+                    if (initialStock > 0) {
+                        // Register SKU with 0 stock first
+                        data.stockQuantity = 0;
+                        const partRes = await api.parts.create(data);
+                        const newPart = partRes.data;
+                        
+                        // Automatically create the restock purchase invoice
+                        const restockRes = await api.restocks.create({
+                            notes: `Initial stock for registered part: ${newPart.name}`,
+                            items: [{
+                                partId: newPart.id,
+                                quantity: initialStock,
+                                unitPrice: data.price
+                            }]
+                        });
+                        
+                        ui.showToast('Part registered & restock invoice created.');
+                        if (restockRes.data) {
+                            ui.generateRestockPDF(restockRes.data);
+                        }
+                    } else {
+                        await api.parts.create(data);
+                        ui.showToast('Entry logged.');
+                    }
                 }
                 ui.hideModal('part-modal');
                 loadParts();

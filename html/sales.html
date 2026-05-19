@@ -189,6 +189,15 @@
             </div>
 
             <div class="invoice-sheet" id="invoice-sheet">
+                <div class="invoice-header-logo-container" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <img src="../assets/logo.png" alt="VehicleX Logo" style="height: 60px; filter: brightness(0) invert(1);">
+                    </div>
+                    <div style="text-align: right;">
+                        <h2 style="margin: 0; color: #fff; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">VehicleX</h2>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Vehicle Repair &amp; Inventory Management System</div>
+                    </div>
+                </div>
                 <div class="invoice-meta-grid">
                     <div class="meta-cell">
                         <div class="meta-label">Invoice Number</div>
@@ -660,30 +669,53 @@
             }
 
             const invoiceNo = currentInvoice.invoiceNumber || `INV-${currentInvoice.invoiceId}`;
-            const invoiceText = [
-                `Invoice Number: ${invoiceNo}`,
-                `Date: ${new Date(currentInvoice.createdAtUtc || Date.now()).toLocaleString()}`,
-                `Customer: ${document.getElementById('invoice-customer').textContent}`,
-                `Payment Status: ${currentInvoiceStatus}`,
+            const customerText = document.getElementById('invoice-customer').textContent;
+
+            const escapeCsv = (val) => {
+                const text = String(val === null || val === undefined ? '' : val);
+                if (text.includes(',') || text.includes('"') || text.includes('\n') || text.includes('\r')) {
+                    return `"${text.replace(/"/g, '""')}"`;
+                }
+                return text;
+            };
+
+            const csvRows = [
+                ['Invoice Number', invoiceNo].map(escapeCsv).join(','),
+                ['Date', new Date(currentInvoice.createdAtUtc || Date.now()).toLocaleString()].map(escapeCsv).join(','),
+                ['Customer', customerText].map(escapeCsv).join(','),
+                ['Payment Status', currentInvoiceStatus].map(escapeCsv).join(','),
                 '',
-                'Items:'
+                ['Part Name', 'Part Number', 'Quantity', 'Unit Price', 'Line Total'].map(escapeCsv).join(',')
             ];
 
             (currentInvoice.items || []).forEach(item => {
-                invoiceText.push(`- ${item.partName} [${item.partNumber}] x${item.quantity} @ ${money(item.unitPrice)} = ${money(item.lineTotal)}`);
+                csvRows.push([
+                    item.partName,
+                    item.partNumber,
+                    item.quantity,
+                    item.unitPrice,
+                    item.quantity * item.unitPrice
+                ].map(escapeCsv).join(','));
             });
 
-            invoiceText.push('');
-            invoiceText.push(`Subtotal: ${document.getElementById('invoice-subtotal').textContent}`);
-            invoiceText.push(`Discount: ${document.getElementById('invoice-discount').textContent}`);
-            invoiceText.push(`Tax: ${document.getElementById('invoice-tax').textContent}`);
-            invoiceText.push(`Grand Total: ${document.getElementById('invoice-grand-total').textContent}`);
+            const subtotal = Number(currentInvoice.subTotalAmount || 0);
+            const discount = Number(currentInvoice.discountAmount || 0);
+            const discountedSubtotal = subtotal - discount;
+            const tax = Number((discountedSubtotal * salesPricing.defaultTaxRate).toFixed(2));
+            const grandTotal = Math.max(0, Number((discountedSubtotal + tax).toFixed(2)));
 
-            const blob = new Blob([invoiceText.join('\n')], { type: 'text/plain;charset=utf-8' });
+            csvRows.push('');
+            csvRows.push(['Subtotal', '', '', '', subtotal.toFixed(2)].map(escapeCsv).join(','));
+            csvRows.push(['Loyalty Discount', '', '', '', discount.toFixed(2)].map(escapeCsv).join(','));
+            csvRows.push(['Tax (13%)', '', '', '', tax.toFixed(2)].map(escapeCsv).join(','));
+            csvRows.push(['Grand Total', '', '', '', grandTotal.toFixed(2)].map(escapeCsv).join(','));
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = `${invoiceNo}.txt`;
+            anchor.download = `${invoiceNo}.csv`;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();

@@ -24,6 +24,14 @@
     </nav>
 
     <main>
+        <!-- Print Only Header -->
+        <div class="print-only" style="margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem; width: 100%;">
+            <h1 style="color: #000; font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">VehicleX Customer Loyalty Report</h1>
+            <div style="color: #555; font-size: 0.9rem;">
+                Generated: <span id="print-res-date" style="font-weight: bold; color: #000;">--</span>
+            </div>
+        </div>
+
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
@@ -307,6 +315,7 @@
                 document.getElementById('intel-loyalty').textContent = intel.totalLoyaltyMembers || 0;
                 document.getElementById('intel-repeat').textContent = `${intel.repeatCustomerRate.toFixed(1)}%`;
                 document.getElementById('intel-total').textContent = intel.totalCustomerCount || 0;
+                document.getElementById('print-res-date').textContent = new Date().toLocaleString();
 
             } catch (err) {
                 console.error(err);
@@ -315,7 +324,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!api.auth.requireStaff()) return;
+            if (!api.auth.requireAdmin()) return;
             ui.setupStaffSidebar('loyalty-reports.html');
             loadCustomerReports();
             ui.refreshIcons();

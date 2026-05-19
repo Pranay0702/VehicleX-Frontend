@@ -123,6 +123,12 @@
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const phone = document.getElementById('cust-phone').value.trim();
+            if (!ui.validateNepalPhone(phone)) {
+                ui.showToast('Phone number must start with +977 and be followed by a 97 or 98 Nepalese mobile number (e.g. +9779841234567).', 'error');
+                return;
+            }
+
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 

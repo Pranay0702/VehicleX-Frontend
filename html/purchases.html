@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Purchases | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .purchase-row {
             display: grid;
@@ -99,6 +100,7 @@
                             <th>Items</th>
                             <th>Total Amount</th>
                             <th>Internal Memo</th>
+                            <th style="width: 80px; text-align: right;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="purchases-body">
@@ -188,7 +190,7 @@
             tbody.innerHTML = '';
 
             if (allPurchasesList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 4rem; font-size: 0.8rem;">NO RECENT ACTIVITY LOGGED</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 4rem; font-size: 0.8rem;">NO RECENT ACTIVITY LOGGED</td></tr>';
                 document.getElementById('purchases-page-info').textContent = 'Showing 0 entries';
                 document.getElementById('btn-purchases-prev').disabled = true;
                 document.getElementById('btn-purchases-next').disabled = true;
@@ -209,6 +211,11 @@
                         <td><span style="background: var(--bg-hover); padding: 4px 8px; border: 1px solid var(--border); font-size: 0.7rem; font-weight: 600;">${p.items.length} SKUs</span></td>
                         <td class="mono" style="font-weight: 600;">NPR ${p.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td style="color: var(--text-dim); font-size: 0.8rem;">${p.notes || '--'}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 6px;" onclick="downloadRestockInvoice(${p.id})" title="Download PDF Invoice">
+                                <i data-lucide="download" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -367,9 +374,25 @@
             try {
                 const res = await api.restocks.create({ notes: document.getElementById('purchase-notes').value, items: items });
                 ui.showToast('Restock invoice finalized.');
+                if (res.data) {
+                    ui.generateRestockPDF(res.data);
+                }
                 hideNewPurchase();
             } catch (err) {
                 ui.showToast(err.message, 'error');
+            }
+        }
+
+        async function downloadRestockInvoice(id) {
+            try {
+                const res = await api.restocks.getById(id);
+                if (res.data) {
+                    ui.generateRestockPDF(res.data);
+                } else {
+                    ui.showToast('No invoice data returned from server.', 'error');
+                }
+            } catch (err) {
+                ui.showToast(err.message || 'Failed to fetch invoice details.', 'error');
             }
         }
 

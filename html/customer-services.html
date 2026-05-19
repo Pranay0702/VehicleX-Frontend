@@ -153,6 +153,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Customer</th>
                             <th>Review</th>
                             <th>Appointment</th>
                             <th>Rating</th>
@@ -356,16 +357,22 @@
                     let historyRes = { data: { purchaseHistory: [], serviceHistory: [] } };
                     let requestRes = { data: [] };
 
+                    let totalPurchasesAcrossAll = 0;
+
                     if (isAdmin) {
                         // Admin ONLY handles Unavailable Part Requests - always show all requests
                         requestRes = await api.unavailablePartRequests.getAll();
                     } else {
                         // Regular Staff handles Appointments and Reviews
                         if (!customerId) {
-                            [appointmentRes, reviewRes] = await Promise.all([
+                            let intelRes = { data: [] };
+                            [appointmentRes, reviewRes, intelRes] = await Promise.all([
                                 api.appointments.getAll(),
-                                api.serviceReviews.getAll()
+                                api.serviceReviews.getAll(),
+                                api.reports.getCustomerIntelligence().catch(() => ({ data: [] }))
                             ]);
+                            const intelList = intelRes.data || [];
+                            totalPurchasesAcrossAll = intelList.reduce((sum, item) => sum + (item.totalPurchases || 0), 0);
                         } else {
                             [appointmentRes, reviewRes, historyRes] = await Promise.all([
                                 api.appointments.getByCustomer(customerId),
@@ -376,7 +383,41 @@
                     }
 
                     appointments = appointmentRes.data || [];
+                    appointments.sort((a, b) => {
+                        const getStatusOrder = (status) => {
+                            const s = String(status).toUpperCase();
+                            if (s === 'PENDING' || s === '1') return 1;
+                            if (s === 'CONFIRMED' || s === '2') return 2;
+                            if (s === 'COMPLETED' || s === '3') return 3;
+                            if (s === 'CANCELLED' || s === '4') return 4;
+                            return 5;
+                        };
+                        const orderA = getStatusOrder(a.statusName || a.status);
+                        const orderB = getStatusOrder(b.statusName || b.status);
+                        if (orderA !== orderB) {
+                            return orderA - orderB;
+                        }
+                        return new Date(b.appointmentDateUtc) - new Date(a.appointmentDateUtc);
+                    });
+
                     const requests = requestRes.data || [];
+                    requests.sort((a, b) => {
+                        const getStatusOrder = (status) => {
+                            const s = String(status).toUpperCase();
+                            if (s === 'PENDING' || s === '1') return 1;
+                            if (s === 'SOURCING' || s === '2') return 2;
+                            if (s === 'AVAILABLE' || s === '3') return 3;
+                            if (s === 'CLOSED' || s === '4') return 4;
+                            return 5;
+                        };
+                        const orderA = getStatusOrder(a.statusName || a.status);
+                        const orderB = getStatusOrder(b.statusName || b.status);
+                        if (orderA !== orderB) {
+                            return orderA - orderB;
+                        }
+                        return new Date(b.createdAtUtc || b.createdDateUtc || 0) - new Date(a.createdAtUtc || a.createdDateUtc || 0);
+                    });
+
                     const reviews = reviewRes.data || [];
                     const history = historyRes.data || { purchaseHistory: [], serviceHistory: [] };
 
@@ -384,7 +425,9 @@
                     renderRequests(requests);
                     renderReviews(reviews);
                     renderHistory(history);
-                    setStats(appointments.length, requests.length, reviews.length, (history.purchaseHistory || []).length);
+
+                    const purchaseCount = customerId ? (history.purchaseHistory || []).length : totalPurchasesAcrossAll;
+                    setStats(appointments.length, requests.length, reviews.length, purchaseCount);
 
                     if (isAdmin) {
                         document.getElementById('stat-req-pending').textContent = requests.filter(r => (r.statusName || r.status) === 'Pending').length;
@@ -410,9 +453,20 @@
                 const tbody = document.getElementById('appointments-body');
                 tbody.innerHTML = items.length ? '' : emptyRow(5, 'No appointments logged');
                 items.forEach(item => {
+                    const status = String(item.statusName || item.status).toUpperCase();
+                    let alertDotHtml = '';
+                    if (status === 'PENDING' || status === '1') {
+                        alertDotHtml = '<span class="pulse-dot pending" title="Pending Action"></span>';
+                    } else if (status === 'CONFIRMED' || status === '2') {
+                        alertDotHtml = '<span class="pulse-dot confirmed" title="Confirmed Action"></span>';
+                    }
+
                     tbody.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td><span style="font-weight: 600; color: #fff;">${item.serviceType}</span></td>
+                        <td style="display: flex; align-items: center; gap: 4px;">
+                            ${alertDotHtml}
+                            <span style="font-weight: 600; color: #fff;">${item.serviceType}</span>
+                        </td>
                         <td class="mono" style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(item.appointmentDateUtc)}</td>
                         <td>${vehicleText(item)}</td>
                         <td>${createStatusDropdown('appointment', item.id, item.statusName || item.status)}</td>
@@ -494,7 +548,7 @@
                 }
             }
 
-            function renderRequests(items) {
+             function renderRequests(items) {
                 const tbody = document.getElementById('requests-body');
                 tbody.innerHTML = items.length ? '' : emptyRow(7, 'No unavailable part requests logged');
                 items.forEach(item => {
@@ -502,10 +556,21 @@
                         ? createPartRequestStatusDropdown(item.id, item.statusName || item.status)
                         : statusBadge(item.statusName || item.status);
 
+                    const status = String(item.statusName || item.status).toUpperCase();
+                    let alertDotHtml = '';
+                    if (status === 'PENDING' || status === '1') {
+                        alertDotHtml = '<span class="pulse-dot pending" title="Pending Action"></span>';
+                    } else if (status === 'SOURCING' || status === '2') {
+                        alertDotHtml = '<span class="pulse-dot confirmed" title="Sourcing Part"></span>';
+                    }
+
                     tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td><span style="font-weight: 600; color: #fff;">${item.customerName || 'Unknown'}</span></td>
-                        <td><span style="font-weight: 600; color: #fff;">${item.partName}</span></td>
+                        <td style="display: flex; align-items: center; gap: 4px;">
+                            ${alertDotHtml}
+                            <span style="font-weight: 600; color: #fff;">${item.partName}</span>
+                        </td>
                         <td class="mono" style="color: var(--text-muted);">${item.partNumber || '--'}</td>
                         <td>${[item.vehicleMake, item.vehicleModel].filter(Boolean).join(' ') || '--'}</td>
                         <td class="mono">${item.quantity}</td>
@@ -529,10 +594,11 @@
 
             function renderReviews(items) {
                 const tbody = document.getElementById('reviews-body');
-                tbody.innerHTML = items.length ? '' : emptyRow(4, 'No service reviews submitted');
+                tbody.innerHTML = items.length ? '' : emptyRow(5, 'No service reviews submitted');
                 items.forEach(item => {
                     tbody.insertAdjacentHTML('beforeend', `
                     <tr>
+                        <td><span style="font-weight: 600; color: #fff;">${item.customerName || 'Unknown'}</span></td>
                         <td style="color: var(--text-main);">${item.comment}</td>
                         <td class="mono" style="color: var(--text-muted);">${item.appointmentId || 'GENERAL'}</td>
                         <td>${renderStars(item.ratingName || item.rating)}</td>
@@ -691,11 +757,7 @@
                     await syncWorkspace();
                 } else {
                     await loadCustomers();
-                    setStats(0, 0, 0, 0);
-                    renderAppointments([]);
-                    renderRequests([]);
-                    renderReviews([]);
-                    renderHistory({ purchaseHistory: [], serviceHistory: [] });
+                    await syncWorkspace();
                 }
             });
         </script>
