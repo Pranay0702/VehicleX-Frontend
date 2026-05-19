@@ -404,6 +404,135 @@ const ui = {
         }
     },
 
+    generateSalesReceiptPDF(inv) {
+        try {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) {
+                console.error("jsPDF library is not loaded.");
+                this.showToast("PDF generation failed: jsPDF not loaded.", "error");
+                return;
+            }
+            const doc = new jsPDF();
+
+            const primaryColor = [18, 18, 18];
+            const accentColor = [230, 126, 34];
+            const grayColor = [100, 100, 100];
+
+            doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(24);
+            doc.text("VEHICLEX", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+            doc.setFont("helvetica", "normal");
+            doc.text("Next-Gen Vehicle Parts & Service Management", 14, 25);
+
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("CUSTOMER SALES RECEIPT", 14, 40);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            
+            const dateStr = inv.createdAtUtc || inv.purchaseDateUtc || new Date().toISOString();
+            doc.text(`Receipt Number: ${inv.invoiceNumber}`, 14, 50);
+            doc.text(`Date: ${new Date(dateStr).toLocaleString()}`, 14, 56);
+            doc.text(`Customer Name: ${inv.customerName || 'Valued Customer'}`, 14, 62);
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 68, 196, 68);
+
+            let y = 78;
+            doc.setFont("helvetica", "bold");
+            doc.text("Item Name", 14, y);
+            doc.text("SKU", 85, y);
+            doc.text("Qty", 125, y);
+            doc.text("Unit Price (NPR)", 140, y);
+            doc.text("Total (NPR)", 170, y);
+
+            doc.line(14, y + 2, 196, y + 2);
+
+            doc.setFont("helvetica", "normal");
+            y += 8;
+
+            const items = inv.items || [];
+            items.forEach(item => {
+                let name = item.partName || "Unknown Part";
+                if (name.length > 32) name = name.substring(0, 30) + "...";
+
+                doc.text(name, 14, y);
+                doc.text(item.partNumber || "--", 85, y);
+                doc.text(String(item.quantity), 125, y);
+                doc.text(Number(item.unitPrice).toFixed(2), 140, y);
+                doc.text(Number(item.lineTotal || (item.unitPrice * item.quantity)).toFixed(2), 170, y);
+
+                y += 8;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Item Name", 14, y);
+                    doc.text("SKU", 85, y);
+                    doc.text("Qty", 125, y);
+                    doc.text("Unit Price (NPR)", 140, y);
+                    doc.text("Total (NPR)", 170, y);
+                    doc.line(14, y + 2, 196, y + 2);
+                    doc.setFont("helvetica", "normal");
+                    y += 8;
+                }
+            });
+
+            doc.line(14, y, 196, y);
+            y += 8;
+
+            const subtotal = Number(inv.subTotalAmount || inv.subtotal || 0);
+            const discount = Number(inv.discountAmount || inv.discount || 0);
+            const taxable = subtotal - discount;
+            const tax = taxable * 0.13;
+            const grandTotal = Number(inv.totalAmount || inv.grandTotal || 0);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Subtotal:", 120, y);
+            doc.text(subtotal.toFixed(2), 170, y);
+            y += 6;
+
+            if (discount > 0) {
+                doc.text("Discount:", 120, y);
+                doc.text(`-${discount.toFixed(2)}`, 170, y);
+                y += 6;
+            }
+
+            doc.text("VAT (13%):", 120, y);
+            doc.text(tax.toFixed(2), 170, y);
+            y += 8;
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("Grand Total (NPR):", 120, y);
+            doc.text(grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }), 170, y);
+
+            y += 20;
+            if (y > 270) {
+                doc.addPage();
+                y = 30;
+            }
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "italic");
+            doc.setTextColor(grayColor[0], grayColor[1], grayColor[2]);
+            doc.text("Thank you for shopping with VehicleX! Drive safe.", 14, y);
+
+            doc.save(`Receipt_${inv.invoiceNumber}.pdf`);
+            this.showToast(`Receipt PDF generated successfully.`);
+        } catch (err) {
+            console.error("PDF Generation Error:", err);
+            this.showToast("Receipt PDF generation failed.", "error");
+        }
+    },
+
     showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');

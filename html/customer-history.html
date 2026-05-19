@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My History | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -102,6 +103,7 @@
                         <th>Parts</th>
                         <th>Total Amount</th>
                         <th>Status</th>
+                        <th style="width: 100px; text-align: right;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="purchases-body">
@@ -345,7 +347,7 @@
 
             tbody.innerHTML = '';
             if (purchasesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="muted-empty">No purchase history found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="muted-empty">No purchase history found.</td></tr>';
             } else {
                 paginatedData.forEach(pur => {
                     const items = pur.items || [];
@@ -360,9 +362,15 @@
                             </td>
                             <td class="mono">NPR ${Number(pur.totalAmount).toFixed(2)}</td>
                             <td class="mono" style="color: var(--text-dim);">${pur.statusName || '--'}</td>
+                            <td style="text-align: right;">
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.7rem; border-color: var(--accent); color: var(--accent);" onclick="downloadReceipt(${pur.id})">
+                                    <i data-lucide="download" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Receipt
+                                </button>
+                            </td>
                         </tr>
                     `);
                 });
+                ui.refreshIcons();
             }
             updatePaginationControls('purchases', purchasesData.length, purchasesPage);
         }
@@ -450,6 +458,19 @@
                 });
             }
             updatePaginationControls('requests', requestsData.length, requestsPage);
+        }
+        function downloadReceipt(purId) {
+            const pur = purchasesData.find(p => p.id === purId);
+            if (pur) {
+                const displayName = document.getElementById('customer-display-name').textContent;
+                const inv = {
+                    ...pur,
+                    customerName: displayName
+                };
+                ui.generateSalesReceiptPDF(inv);
+            } else {
+                ui.showToast('Purchase details not found.', 'error');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

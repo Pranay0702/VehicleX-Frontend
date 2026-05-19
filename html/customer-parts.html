@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buy Parts | VehicleX</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .workbench {
             display: flex;
@@ -512,10 +513,12 @@
                     quantity: item.quantity
                 }))
             };
-
             try {
-                await api.portal.purchaseParts(payload);
+                const res = await api.portal.purchaseParts(payload);
                 ui.showToast('Order placed successfully!');
+                if (res && res.data) {
+                    ui.generateSalesReceiptPDF(res.data);
+                }
                 cart = [];
                 renderCart();
                 // Refresh catalog to update stock quantity
