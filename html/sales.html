@@ -70,8 +70,7 @@
             <div class="form-group">
                 <label>Payment Status</label>
                 <select id="payment-status">
-                    <option value="Paid">Paid</option>
-                    <option value="Pending">Pending</option>
+                    <option value="Cash">Cash</option>
                     <option value="Credit">Credit</option>
                 </select>
             </div>
@@ -189,13 +188,18 @@
             </div>
 
             <div class="invoice-sheet" id="invoice-sheet">
-                <div class="invoice-header-logo-container" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="invoice-header-logo-container"
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
                     <div>
-                        <img src="../assets/logo.png" alt="VehicleX Logo" style="height: 60px; filter: brightness(0) invert(1);">
+                        <img src="../assets/logo.png" alt="VehicleX Logo"
+                            style="height: 60px; filter: brightness(0) invert(1);">
                     </div>
                     <div style="text-align: right;">
-                        <h2 style="margin: 0; color: #fff; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">VehicleX</h2>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">Vehicle Repair &amp; Inventory Management System</div>
+                        <h2
+                            style="margin: 0; color: #fff; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                            VehicleX</h2>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Vehicle Repair &amp; Inventory
+                            Management System</div>
                     </div>
                 </div>
                 <div class="invoice-meta-grid">
@@ -285,7 +289,7 @@
         let salesParts = [];
         let cartItems = [];
         let currentInvoice = null;
-        let currentInvoiceStatus = 'Paid';
+        let currentInvoiceStatus = 'Cash';
 
         function money(value) {
             return `NPR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -564,7 +568,7 @@
 
         function statusType(status) {
             const value = String(status || '').toLowerCase();
-            if (value.includes('paid')) return 'success';
+            if (value.includes('paid') || value.includes('cash')) return 'success';
             if (value.includes('pending')) return 'warning';
             return 'error';
         }
@@ -619,7 +623,7 @@
 
             const btn = document.getElementById('btn-email-invoice');
             const originalHtml = btn.innerHTML;
-            
+
             try {
                 btn.disabled = true;
                 btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 14px;"></i> Sending...`;
@@ -627,18 +631,18 @@
 
                 const invoiceId = currentInvoice.invoiceId || currentInvoice.id;
                 const response = await api.email.sendInvoice(invoiceId);
-                
+
                 // For backend 500 errors, the api.js might throw, but if it returns an error object:
                 if (response && response.status === 'error') {
                     throw new Error(response.message || 'Failed to email invoice');
                 }
-                
+
                 ui.showToast(`Invoice sent successfully to ${response.data?.sentTo || 'customer'}`);
             } catch (err) {
                 console.error("Email Error:", err);
                 // Make the error handling extremely robust to catch all variations of the 5.7.8 Auth error
                 const errorMsg = String(err.message || err).toLowerCase();
-                
+
                 if (errorMsg.includes('5.7.8') || errorMsg.includes('authentication') || errorMsg.includes('credentials') || errorMsg.includes('badcredentials') || errorMsg.includes('535')) {
                     ui.showToast('Google blocked the email. You MUST use a 16-character Google "App Password" in your backend appsettings.json, not your normal Gmail password.', 'error');
                 } else if (errorMsg.includes('failed to fetch') || errorMsg.includes('network')) {

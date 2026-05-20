@@ -224,7 +224,9 @@ const api = {
         getParts: () => api.fetch('/sales/parts', {}, 'staff'),
         createInvoice: (data) => api.fetch('/sales/invoices', { method: 'POST', body: JSON.stringify(data) }, 'staff'),
         getInvoiceById: (id) => api.fetch(`/sales/invoices/${id}`, {}, 'staff'),
+        payCredit: (id) => api.fetch(`/sales/invoices/${id}/mark-paid`, { method: 'PUT' }, 'staff'),
     },
+
 
     email: {
         sendInvoice: (invoiceId) => api.fetch(`/email/invoice/${invoiceId}`, { method: 'POST' }, 'staff')

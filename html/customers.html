@@ -493,9 +493,16 @@
                         <td class="mono" style="font-weight: 600;">${money(invoice.totalAmount)}</td>
                         <td>${paymentStatus}</td>
                         <td style="text-align: right;">
-                            <button class="btn btn-secondary" style="padding: 6px;" onclick="toggleInvoiceItems(${invoice.invoiceId})">
-                                <i data-lucide="chevrons-down-up" style="width: 12px; height: 12px;"></i>
-                            </button>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                                ${invoice.isCredit && !invoice.isCreditPaid ? `
+                                    <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--accent) 0%, #e67e22 100%); border: none; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" onclick="confirmMarkAsPaid(${invoice.invoiceId}, '${invoice.invoiceNumber}')">
+                                        <i data-lucide="check" style="width: 12px; height: 12px;"></i> Mark Paid
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-secondary" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="toggleInvoiceItems(${invoice.invoiceId})">
+                                    <i data-lucide="chevrons-down-up" style="width: 12px; height: 12px;"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `);
@@ -589,6 +596,27 @@
 
             await loadCustomerDetails(selectedCustomerDetails.customerId);
         }
+
+        async function confirmMarkAsPaid(invoiceId, invoiceNumber) {
+            if (confirm(`Are you sure you want to mark invoice ${invoiceNumber} as paid (Cash / Credit Settled)?`)) {
+                try {
+                    const response = await api.sales.payCredit(invoiceId);
+                    ui.showToast(response.message || 'Invoice marked as paid successfully!');
+                    
+                    // Reload customer details to refresh the history table
+                    if (selectedCustomerDetails && selectedCustomerDetails.customerId) {
+                        await loadCustomerDetails(selectedCustomerDetails.customerId);
+                    }
+                    
+                    // Fetch directory to update customer intelligence active badges, totals, and counts
+                    await fetchDirectory();
+                } catch (err) {
+                    const msg = err.errors?.length ? err.errors[0] : err.message;
+                    ui.showToast(msg || 'Failed to update payment status.', 'error');
+                }
+            }
+        }
+
 
         function toggleInvoiceItems(invoiceId) {
             if (expandedInvoiceRows.has(invoiceId)) {
